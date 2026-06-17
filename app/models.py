@@ -64,7 +64,7 @@ class Cart(db.Model):
     __tablename__ = "carts"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeginKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
 
@@ -104,5 +104,86 @@ class Order(db.Model):
     
     def __repr__(self):
         return f"<Order {self.order_number}>"
+    
+
+#contains items in each order
+class OrderItem(db.Model):
+    __tablename__ = "order_items"
+
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    quantity = db.Column(db.Integer, nullable=False)
+    price = db.Column(db.Float, nullable=False)
+
+    def __repr__(self):
+        return f"<OrderItem Order {self.order_id} Product {self.product_id}>"
+    
+
+#contains product reviews and ratings
+class Review (db.Model):
+    __tablename__ = "reviews"
+
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    rating = db.Column(db.Ingeter)
+    comment = db.Column(db.Text)
+    title = db.Column(db.string(200))
+    is_verified = db.Column(db.Boolean, default=False)
+    helpful_count = db.Column(db.Integer, default=0)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+
+    def __repr__(self):
+        return f"<Review by User {self.user_id} For Product {self.product_id}>"
+    
+#contains Users wishlist/Favourite items
+class WishList(db.Model):
+    __tablename__ = "wishlists"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    added_at = db.Column(db.DateTime, default=db.func.now())
+    
+    def __repr__(self):
+        return f"<WishList User {self.user_id} Product {self.product_id}>"
+    
+#contains Promocodes and Discounts
+class DiscountCode(db.Model):
+    __tablename__ = "discount_codes"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    code = db.Column(db.String(50), unique=True, nullable=False)
+    description = db.Column(db.Text)
+    discount_type = db.Column(db.String(20))
+    discount_value = db.Column(db.Float, nullable=False)
+    minimum_purchase = db.Column(db.Float, default=0)
+    max_usage = db.Column(db.Integer)
+    usage_count = db.Column(db.Integer, default=0)
+    is_active = db.Column(db.Boolean, default=True)
+    valid_from = db.Column(db.DateTime)
+    valid_until = db.Column(db.DateTime)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    
+    def __repr__(self):
+        return f"<DiscountCode {self.code}>"
+    
+#contains contact form messages
+class ContactMessage(db.Model):
+    __tablename__ = "contact_messages"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    name = db.Column(db.String(100), nullable=False)
+    email = db.Column(db.String(100), nullable=False)
+    phone = db.Column(db.String(20))
+    subject = db.Column(db.String(200), nullable=False)
+    message = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), default="unread")
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    
+    def __repr__(self):
+        return f"<ContactMessage from {self.email}>"
+
 
 
