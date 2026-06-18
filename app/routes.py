@@ -112,3 +112,156 @@ def login():
 def logout():
     session.clear()
     return redirect(url_for('main.index'))
+
+# --------------------------------Shopping cart routes ------------------------------------
+@bp.route('/cart')
+def view_cart():
+    if 'user_id' not in session:
+        return redirect(url_for('main.login'))
+    
+    user_id = session['user_id']
+    cart = Cart.query.filter_by(user_id=user_id).first()
+
+    if not cart:
+        cart_items = []
+        total = 0
+    else:
+        cart_items = Cart.query.filter_by(cart_id=cart.id).all()
+        total = sum(item.product.price * item.quantity for item in cart_items)
+
+    return render_template('cart.html', cart_items=cart_items, total=total, page_title='Shopping Cart - Aura By Honeyy')
+
+@bp.route('/cart/add/<int:product_id>', methods=['POST'])
+def add_to_cart(product_id):
+    if 'user_id' not in session:
+        return redirect(url_for('main.login'))
+
+    quantity = request.form.get('quantity', 1, type=int)
+
+    user_id = session['user_id']
+    cart = Cart.query.filter_by(user_id=user_id).first()
+
+    #create cart
+    if not cart:
+        cart = Cart(user_id=user_id)
+        db.session.add(cart)
+        db.session.commit()
+
+    #check if product already in cart
+    cart_item = CartItem.query.filter_by(cart_id=cart.id, product_id=product_id).first()
+
+    if cart_item:
+        cart_item.quantity += quantity
+    else:
+        cart_item = CartItem(
+            cart_id = cart.id,
+            product_id=product_id,
+            quantity=quantity
+        )
+        db.session.add(cart_item)
+    db.session.commit()
+    return redirect(url_for('main.view_cart'))
+    
+@bp.route('/cart/remove/<int:cart_item_id>', methods=['POST'])
+def remove_from_cart(cart_item_id):
+    cart_item = CartItem.query.get_or_404(cart_item_id)
+    db.session.delete(cart_item)
+    db.session.commit()
+    
+    return redirect(url_for('main.view_cart'))
+
+@bp.route('/cart/update/<int:cart_item_id>', methods=['POST'])
+def remove_from_cart(cart_item_id):
+    cart_item = CartItem.query.get_or_404(cart_item_id)
+    quantity = request.form.get('quantity', 1, type=int)
+    
+    if quantity > 0:
+        cart_item.quantity = quantity
+    else:
+        db.session.delete(cart_item)
+
+    db.session.commit()
+    return redirect(url_for('main.view_cart'))
+
+# ---------------------- product interaction cart -------------------------------
+@bp.route('/product/<int:product_id>/review', methods=['POST'])
+def add_review(product_id):
+    """Add product review"""
+    if 'user_id' not in session:
+        return redirect(url_for('main.login'))
+    
+    user_id = session['user_id']
+    rating = request.form.get('rating', type=int)
+    comment = request.form.get('comment')
+    
+    review = Review(
+        user_id=user_id,
+        product_id=product_id,
+        rating=rating,
+        comment=comment,
+        is_verified=True
+    )
+    
+    db.session.add(review)
+    db.session.commit()
+    
+    return redirect(url_for('main.product_detail', product_id=product_id))
+
+@bp.route('/product/<int:product_id>/wishlist', methods=['POST'])
+def toggle_wishlist(product_id):
+    """Add/remove from wishlist"""
+    if 'user_id' not in session:
+        return redirect(url_for('main.login'))
+    
+    user_id = session['user_id']
+    
+    # Check if already in wishlist
+    wish = WishList.query.filter_by(
+        user_id=user_id,
+        product_id=product_id
+    ).first()
+    
+    if wish:
+        # Remove from wishlist
+        db.session.delete(wish)
+    else:
+        # Add to wishlist
+        wish = WishList(user_id=user_id, product_id=product_id)
+        db.session.add(wish)
+    
+    db.session.commit()
+    return redirect(url_for('main.product_detail', product_id=product_id))
+
+# ------------------------ contact route -----------------------------------
+
+@bp.route('/contact', methods=['GET', 'POST'])
+def contact():
+    """Contact form"""
+    if request.method == 'POST':
+        name = request.form.get('name')
+        email = request.form.get('email')
+        phone = request.form.get('phone')
+        subject = request.form.get('subject')
+        message = request.form.get('message')
+        
+        contact_msg = ContactMessage(
+            name=name,
+            email=email,
+            phone=phone,
+            subject=subject,
+            message=message
+        )
+        
+        db.session.add(contact_msg)
+        db.session.commit()
+        
+        return render_template(
+            'contact.html',
+            success='Message sent successfully!',
+            page_title='Contact Us - Aura by Honeyy'
+        )
+    
+    return render_template(
+        'contact.html',
+        page_title='Contact Us - Aura by Honeyy'
+    )
