@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %}Shop - Aura By Honeyy{% endblock %}
+
+{% block content %}
+    <h1>Our Products</h1>
+    <hr>
+
+    
+    <div class="mb-4">
+        <h5>Filter by Category:</h5>
+        <div class="btn-group" role="group">
+            <a href="/shop" class="btn btn-outline-primary">All</a>
+            {% for category in categories %}
+                <a href="/shop?category={{ category.id }}" class="btn btn-outline-primary">
+                    {{ category.name }}
+                </a>
+            {% endfor %}
+        </div>
+    </div>
+
+    {% if products %}
+        <div class="row">
+            {% for product in products  %}
+                <div class="col-md-3 mb-4">
+                    <div class="card h-100">
+                        <div class="card-body">
+                            <h5 class="card-title">{{ product.name }}</h5>
+                            <p class="card-text text-muted">{{ product.description[:80] }}...</p>
+                            
+                            <p class="h6">Category: {{ product.category.name }}</p>
+                            
+                            <p class="h4 text-primary mb-3">₹{{ product.price }}</p>
+                            
+                            {% if product.stock > 0 %}
+                                <span class="badge bg-success">In Stock</span>
+                            {% else %}
+                                <span class="badge bg-danger">Out of Stock</span>
+                            {% endif %}
+                            
+                            <br><br>
+                            
+                            <a href="/product/{{ product.id }}" class="btn btn-primary btn-sm w-100">View Details</a>
+                        </div>
+                    </div>
+                </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p>No products available. Check back soon!</p>
+        </div>
+    {% endif %}
+
+
+{% endblock %}

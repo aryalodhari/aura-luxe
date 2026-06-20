@@ -209,7 +209,6 @@ def add_review(product_id):
 
 @bp.route('/product/<int:product_id>/wishlist', methods=['POST'])
 def toggle_wishlist(product_id):
-    """Add/remove from wishlist"""
     if 'user_id' not in session:
         return redirect(url_for('main.login'))
     
@@ -236,7 +235,6 @@ def toggle_wishlist(product_id):
 
 @bp.route('/contact', methods=['GET', 'POST'])
 def contact():
-    """Contact form"""
     if request.method == 'POST':
         name = request.form.get('name')
         email = request.form.get('email')
@@ -265,3 +263,16 @@ def contact():
         'contact.html',
         page_title='Contact Us - Aura by Honeyy'
     )
+
+# --------------------------------------- Handles Errors --------------------------------------
+
+@bp.errorhandler(404)
+def not_found(error):
+    """404 error page"""
+    return render_template('404.html', page_title='Page Not Found'), 404
+
+
+@bp.errorhandler(500)
+def server_error(error):
+    """500 error page"""
+    return render_template('500.html', page_title='Server Error'), 500

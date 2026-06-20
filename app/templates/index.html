@@ -1,0 +1,56 @@
+{% extends "base.html" %}
+
+{% block title %} Home - Aura By Honeyy {% endblock %}
+
+{% block content %}
+    <div class="jumbotron bg-light py-5 rounded">
+        <h1 class="display-4">Welcome to Aura ✨</h1>
+        <p class="lead">Discover premium beauty and skincare products for your daily routine.</p>
+        <hr class="my-4">
+        <a class="btn btn-primary btn-lg" href="/shop" role="button">Shop Now</a>
+    </div>
+
+    <div class="container my-5">
+        <h2 class="mb-4"> Featured Products</h2>
+
+        {% if featured_products %}
+            <div class="row">
+                {% for product in featured_products %}
+                    <div class="col-md-4 mb-4">
+                        <div class="card">
+                            <div class="card-body">
+                                <h5 class="card-title">{{ product.name }}</h5>
+                                <p class="card-text">{{ product.description[:100] }}...</p>
+                                <p class="h5 text-primary">{{ product.price }}</p>
+                                <a href="/product/{{ product.id }}" class="btn btn-primary btn-sm">View Details</a>
+                            </div>
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+        {% else %}
+            <p class="text-muted"> No Featured Products Available!</p>
+        {% endif %}
+    </div>
+
+    <div class="bg-light py-5">
+        <div class="container">
+            <h2 class="mb-4">Why Choose Aura?</h2>
+            <div class="row">
+                <div class="col-md-4">
+                    <h5>✓ Premium Quality</h5>
+                    <p>Hand-selected products from trusted brands.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>✓ Fast Delivery</h5>
+                    <p>Quick and reliable shipping to your doorstep.</p>
+                </div>
+                <div class="col-md-4">
+                    <h5>✓ 100% Authentic</h5>
+                    <p>All products are guaranteed authentic.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
