@@ -1,0 +1,103 @@
+{% extends "base.html" %}
+
+{% block title %}{{ product.name - Aura By Honeyy }}{% endblock  %}
+
+{% block content %}
+    <div class="row">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h2>{{ product.name }}</h2>
+                    <p class="text-muted">SKU: {{ product.sku }}</p>
+                    <P class="h3 text-primary mb-3">₹{{ product.price }}</P>
+                    <p class="card-text">{{ product.description }}</p>
+                    <p>
+                        {% if product.stock > 0 %}
+                            <span class="badge bg-success">In Stock ({{ product.stock }} available)</span>
+                        {% else %}
+                            <span class="badge bg-danger"> Out of Stock</span>
+                        {% endif %}
+                    </p>
+                    <form action="/cart/add/{{ product.id }}" method="POST" class="mb-3">
+                        <div class="mb-3">
+                            <label for="quantity">Quantity</label>
+                            <input type="number" name="quantity" id="quantity" class="form-control" value="1" min="1" max="{{ product.stock }}">
+                        </div>
+                        <button type="submit" class="btn btn-success w-100" {% if product.stock == 0 %}disabled{% endif %}> 🛒 Add to Cart</button>
+                    </form>
+                    <form action="/product/{{ product.id }}/whislist" method="post">
+                        <button type="submit" class="btn btn-outline-danger w-100">♡ Add to Wishlist</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-body">
+                    <h3>Customer Review</h3>
+                    {% if 'user_id' in session %}
+                        <form action="/product/{{ product.id }}/review" class="mb-3" method="post">
+                            <div class="mb-3">
+                                <label for="rating">Rating:</label>
+                                <select name="rating" id="rating" class="form-select">
+                                    <option value="">Select Rating...</option>
+                                    <option value="1">⭐(1 Star)</option>
+                                    <option value="2">⭐⭐(2 Stars)</option>
+                                    <option value="3">⭐⭐⭐(3 Stars)</option>
+                                    <option value="4">⭐⭐⭐⭐(4 Stars)</option>
+                                    <option value="5">⭐⭐⭐⭐⭐(5 Stars)</option>
+                                </select>
+                            </div>
+                            <div class="mb-3">
+                                <label for="comment">Your Review:</label>
+                                <textarea name="comment" id="comment" class="form-control" placeholder="Share your experience..." required></textarea>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Submit Review</button>
+                        </form>
+                        <hr>
+                    {% else %}
+                    <p class="text-muted">
+                        <a href="/login">Login</a> to leave a review
+                    </p>
+                    <hr>
+                    {% endif %}
+
+                    {% if reviews %}
+                        {% for review in reviews %}
+                            <div class="mb-3">
+                                <h5>
+                                    {% for i in range(review.rating) %}⭐{% endfor %}
+                                </h5>
+                                <p>{{ review.comment }}</p>
+                                <small class="text-muted">
+                                    By {{ review.user.username }} on {{ review.created_at.strftime('%Y-%m-%d') }}
+                                </small>
+                            </div>
+                            <hr>
+                        {% endfor %}
+                    {% else %}
+                        <p class="text-muted">No review yet.Be the first to review!</p>
+                    {% endif %}
+                </div>
+            </div>
+
+            {% if similar_products %}
+                <div class="card mt-4">
+                    <div class="card-body">
+                        <h5>Similar Products</h5>
+                        {% for product in similar_products %}
+                        <div class="mb-3">
+                            <a href="/product/{{ product.id }}">
+                                <strong>{{ product.name }}</strong>
+                            </a>
+                            <p class="text-primary">{{ product.price }}</p>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+
+{% endblock %}

@@ -1,0 +1,60 @@
+{% extends "base.html" %}
+
+{% block title %}Shopping Cart - Aura By Honeyy{% endblock %}
+
+{% block content %}
+    <h1>Shopping Cart</h1>
+    <hr>
+
+    {% if cart_items %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Product</th>
+                    <th>Price</th>
+                    <th>Quantity</th>
+                    <th>Subtotal</th>
+                    <th>Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in cart_items %}            
+                    <tr>
+                        <td>
+                            <a href="/product/{{ item.product.id }}">{{ item.product.name }}</a>
+                        </td>  
+                        <td>{{ item.product.price }}</td>
+                        <td>
+                            <form action="/cart/update/{{ item.id }}" method="post" class="d-inline">
+                                <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control" style="width: 80px;">
+                                <button type="submit" class="btn btn-sm btn-warning">Update</button>
+                            </form>
+                        </td>
+                        <td>{{ item.product.price * item.quantity }}</td>                  
+                        <td>
+                            <form action="/cart/remove/{{ item.id }}" method="post" class="d-inline">
+                                <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                            </form>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div class="row">
+            <div class="col-md-6">
+                  <a href="/shop" class="btn btn-outline-primary">Continue Shopping</a>
+            </div>
+            <div class="col-md-6 text-end">
+            <h3>Total: ₹{{ total }}</h3>
+                <a href="/checkout" class="btn btn-success btn-lg">Proceed to Ckeckout</a>
+            </div>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <h5>Your Cart is Empty</h5>
+            <p>Start Shopping to add items to your cart!</p>
+            <a href="/shop" class="btn btn-primary">Continue Shopping</a>
+        </div>
+    {% endif %}
+{% endblock %}

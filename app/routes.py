@@ -171,7 +171,7 @@ def remove_from_cart(cart_item_id):
     return redirect(url_for('main.view_cart'))
 
 @bp.route('/cart/update/<int:cart_item_id>', methods=['POST'])
-def remove_from_cart(cart_item_id):
+def update_cart(cart_item_id):
     cart_item = CartItem.query.get_or_404(cart_item_id)
     quantity = request.form.get('quantity', 1, type=int)
     
