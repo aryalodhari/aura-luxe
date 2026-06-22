@@ -171,7 +171,7 @@ def remove_from_cart(cart_item_id):
     return redirect(url_for('main.view_cart'))
 
 @bp.route('/cart/update/<int:cart_item_id>', methods=['POST'])
-def update_cart(cart_item_id):
+def update_cart_item(cart_item_id):
     cart_item = CartItem.query.get_or_404(cart_item_id)
     quantity = request.form.get('quantity', 1, type=int)
     
@@ -276,3 +276,81 @@ def not_found(error):
 def server_error(error):
     """500 error page"""
     return render_template('500.html', page_title='Server Error'), 500
+
+# -------------------------------------Checkout and orders ----------------------------------
+@bp.route('/checkout', methods=['GET','POST'])
+def checkout():
+    if 'user_id' not in session:
+        return redirect(url_for('main.login'))
+
+    if request.method == 'POST':
+        user_id = session['user_id']
+        user = User.query.get(user_id)
+        cart = Cart.query.filter_by(user_id=user_id).first()
+
+        if not cart:
+            return redirect(url_for('main.view_cart'))
+        
+        cart_items = CartItem.query.filter_by(cart_id=cart.id).all()
+
+        if not cart_items:
+            return redirect(url_for('main.view_cart'))
+        
+        total_amount = sum(item.product.price * item.quantity for item in cart_items)
+
+        #create order
+        order = Order(
+            user_id=user_id,
+            order_number=f"ORD-{datetime.now().strftime('%Y%m%d%H%M%S')}",
+            total_amount=total_amount,
+            final_amount=total_amount,
+            shipping_address=request.form.get('address'),
+            status='pending'
+        )
+
+        db.session.add(order)
+        db.session.commit()
+
+        #Add order item
+        for item in cart_items:
+            order_item = OrderItem(
+                order_id=order.id,
+                product_id=item.product_id,
+                quantity=item.quantity,
+                price=item.product.price
+            )
+            db.session.add(order_item)
+        db.session.cpmmit()
+
+        CartItem.query.filter_by(cart_id=cart.id).delete()
+        db.session.commit()
+        return redirect(url_for('main.order_success'), order_id=order.id)
+    
+    user_id = session['user_id']
+    cart = Cart.query.filter_by(user_id=user_id).first()
+    cart_items = CartItem.query.filter_by(cart_id=cart.id).all() if cart else []
+    total = sum(item.product.price * item.quantity for item in cart_items)
+    
+    return render_template(
+        'checkout.html',
+        cart_items=cart_items,
+        total=total,
+        page_title='Checkout - Aura by Honeyy'
+    )
+
+@bp.route('/order_success/<int:order_id>')
+def order_success(order_id):
+    order = Order.query.get_or_404(order_id)
+    order_item = OrderItem.query.filter_by(order_id=order_id).all()
+
+    return render_template('order_success.html', order=order, order_item=order_item, page_title='Order Confirmed - Aura By Honeyy')
+
+@bp.route('/orders')
+def orders():
+    if 'user_id' not in session:
+        return redirect(url_for('main.login'))
+
+    user_id = session['user_id']
+    orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
+
+    return render_template('orders.html', orders=orders, page_title='My Orders - Aura By Honeyy')

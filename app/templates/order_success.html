@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %}Order Confirmed - Aura by Honeyy{% endblock %}
+
+{% block content %}
+    <div class="text-center">
+        <h1 class="text-success mb-4">✅ Order Confirmed!</h1>
+        
+        <div class="card">
+            <div class="card-body">
+                <h3>Thank you for your order</h3>
+                
+                <p class="h5 mt-4">
+                    Order Number: <span class="text-primary">{{ order.order_number }}</span>
+                </p>
+                
+                <p>Total Amount: <span class="h4 text-success">₹{{ order.total_amount }}</span></p>
+                
+                <p class="text-muted">Status: <span class="badge bg-warning">{{ order.status }}</span></p>
+                
+                <hr>
+                
+                <h5>Items Ordered:</h5>
+                <ul class="list-group">
+                    {% for item in order_items %}
+                        <li class="list-group-item">
+                            {{ item.product.name }} × {{ item.quantity }} = ₹{{ item.price * item.quantity }}
+                        </li>
+                    {% endfor %}
+                </ul>
+                
+                <hr>
+                
+                <p class="text-muted">
+                    Shipping Address: <br>
+                    {{ order.shipping_address }}
+                </p>
+                
+                <p class="text-muted mt-4">
+                    You will receive an email confirmation shortly.
+                </p>
+                
+                <div class="mt-4">
+                    <a href="/orders" class="btn btn-primary">View All Orders</a>
+                    <a href="/shop" class="btn btn-outline-primary">Continue Shopping</a>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
