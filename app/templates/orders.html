@@ -1,0 +1,120 @@
+{% extends "base.html" %}
+
+{% block title %}Orders - Aura By Honeyy{% endblock %}
+
+{% block content %}
+    <h1>My Orders</h1>
+    <hr>
+
+    {% if orders %}
+        <div class="table-responsive">
+            <table class="table table-hover">
+                <thead>
+                    <tr>
+                        <th>Order Number</th>
+                        <th>Date</th>
+                        <th>Items</th>
+                        <th>Total</th>
+                        <th>Status</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td><strong>{{ order.order_number }}</strong></td>
+                            <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
+                            <td>
+                                {% set item_count = order.order_item|length %}
+                                {{ item_count }}
+                                {% if item_count == 1 %}
+                                    item
+                                {% else %}
+                                    items
+                                {% endif %}
+                            </td>
+                            <td><strong>{{ order.total_amount }}</strong></td>
+                            <td>
+                                {% if order.status == 'pending' %}
+                                    <span class="badge bg-warning">pending</span>
+                                {% elif order.status == 'proccessing' %}
+                                    <span class="badge bg-info">Proccessing</span>
+                                {% elif order.status == 'shipped' %}
+                                    <span class="badge bg-primary">Shipped</span>
+                                {%  elif order.status == 'delivered' %}
+                                    <span class="badge bg-success">Delivered</span>
+                                {% elif order.status == 'cancelled' %}
+                                    <span class="badge bg-danger">Cancelled</span>
+                            </td>
+                            <td>
+                                <a href="#order-{{ order.id }}" class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse">View Details</a>
+                            </td>
+                        </tr>
+
+                        <!-- Order details (hidden by default) -->
+                        <tr>
+                            <td colspan="6">
+                                <div class="collapse" id="order-{{ order.id }}">
+                                    <div class="card card-body">
+                                        <h5>Order Items</h5>
+                                        <div class="table-responsive">
+                                            <table class="table table-sm">
+                                                <thead>
+                                                    <tr>
+                                                        <th>Product</th>
+                                                        <th>Quantity</th>
+                                                        <th>Price</th>
+                                                        <th>Subtotal</th>
+                                                    </tr>
+                                                </thead>
+                                                <tbody>
+                                                    {% for item in order.order_items %}
+                                                        <tr>
+                                                            <td>{{ item.product.name }}</td>
+                                                            <td>{{ item.quantity }}</td>
+                                                            <td>{{ item.price }}</td>
+                                                            <td>{{ item.price * item.quantity }}</td>
+                                                        </tr>
+                                                    {% endfor %}
+                                                </tbody>
+                                            </table>
+                                        </div>
+
+                                        <hr>
+
+                                        <h6>Shipping Address:</h6>
+                                        <p class="text-muted">{{ order.shipping_address }}</p>
+
+                                        <h6>Order summary</h6>
+                                        <p>
+                                            Total Items: {{ order.order_items|length }} <br>
+                                            Total Ammount: <strong>{{ order.total_amount }}</strong> <br>
+                                             Status: 
+                                            {% if order.status == 'delivered' %}
+                                                <span class="text-success">✓ Delivered</span>
+                                            {% elif order.status == 'shipped' %}
+                                                <span class="text-info">📦 In Transit</span>
+                                            {% elif order.status == 'processing' %}
+                                                <span class="text-info">⚙️ Processing</span>
+                                            {% else %}
+                                                <span class="text-warning">⏳ {{ order.status|capitalize }}</span>
+                                            {% endif %}
+                                        </p>
+
+                                        <a href="/shop" class="btn btn-sm btn-primary">Continue Shopping</a>
+                                    </div>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+        <h5>No orders yet</h5>
+        <p>You haven't placed any orders yet. Start shopping!</p>
+        <a href="/shop" class="btn btn-primary"> Shop now</a>
+        </div>
+    {% endif %}
+{% endblock %}
