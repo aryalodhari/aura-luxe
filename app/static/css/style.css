@@ -1,0 +1,82 @@
+/* Custom Aura Styling */
+
+body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background-color: #f8f9fa;
+}
+
+.navbar {
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+    font-size: 1.5rem;
+    color: #e91e63 !important;
+}
+
+.card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+}
+
+.btn-primary {
+    background-color: #e91e63;
+    border-color: #e91e63;
+}
+
+.btn-primary:hover {
+    background-color: #c2185b;
+    border-color: #c2185b;
+}
+
+.product-card {
+    text-align: center;
+}
+
+footer {
+    border-top: 1px solid #ddd;
+}
+
+.jumbotron {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+}
+
+.jumbotron h1 {
+    font-weight: 700;
+}
+
+.jumbotron .btn {
+    background-color: #e91e63;
+    border-color: #e91e63;
+}
+
+h1, h2, h3, h4, h5 {
+    color: #333;
+}
+
+.text-primary {
+    color: #e91e63 !important;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .navbar-brand {
+        font-size: 1.2rem;
+    }
+    
+    .col-md-4,
+    .col-md-6 {
+        margin-bottom: 1rem;
+    }
+}
