@@ -30,9 +30,9 @@ def create_app():
     #initialize database with the flask app and this connects the db object to the app
     db.init_app(app)
 
-    #creates all database tables based on models
-    with app.app_context():
-        app.create_all()
+    # #creates all database tables based on models
+    # with app.app_context():
+    #     app.create_all()
 
     # Blueprint Register
     from .routes import bp
