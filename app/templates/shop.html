@@ -1,6 +1,6 @@
 {% extends "base.html" %}
 
-{% block title %}Shop - Aura By Honeyy{% endblock %}
+{% block title %} Shop - Aura By Honeyy{% endblock %}
 
 {% block content %}
     <h1>Our Products</h1>
@@ -25,10 +25,14 @@
                 <div class="col-md-3 mb-4">
                     <div class="card h-100">
                         <div class="card-body">
+                            <img src="/static/uploads/product/{{ product.image_url }}" alt="{{ product.name }}" style="width: 90%;height: 50%; justify-content: center;margin-bottom: 4px;">
                             <h5 class="card-title">{{ product.name }}</h5>
                             <p class="card-text text-muted">{{ product.description[:80] }}...</p>
-                            
-                            <p class="h6">Category: {{ product.category.name }}</p>
+                            {% for category in categories %}
+                                     {% if category.id == product.category_id %}
+                                            <p class="h6">Category: {{ category.name }}</p>
+                                    {% endif %}
+                            {% endfor %}
                             
                             <p class="h4 text-primary mb-3">₹{{ product.price }}</p>
                             

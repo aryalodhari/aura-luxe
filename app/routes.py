@@ -20,22 +20,29 @@ def index():
 
 @bp.route('/shop')
 def shop():
+    # for get the parameter from the url
+    url_params = request.args.get("category",type=int)
+
     #get all active products
     products = Product.query.filter_by(is_active=True).all()
 
     #get all categories
     categories = Category.query.all()
 
+    # filter by the parameters
+    if url_params:
+        products = Product.query.filter(Product.category_id == url_params).all()
+
     return render_template('shop.html',products=products, categories=categories,page_title='Shop - Aura by Honeyy')
 
 @bp.route('/product/<int:product_id>')
 def product_detail(product_id):
     
-    product = Product.query.get_or_404(product_id)
+    product = db.session.get(Product, int(product_id))
 
     reviews = Review.query.filter_by(product_id=product_id).all()
 
-    similar_products = Product.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
+    similar_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
 
     return render_template('product_detail.html', product=product, reviews=reviews, similar_products=similar_products, page_title=f"{product.name} - Aura by Honeyy")
 
@@ -94,7 +101,7 @@ def login():
         password = request.form.get('password')
 
         #find user
-        user = User.query.fitler_by(username=username).first()
+        user = User.query.filter_by(username=username).first()
 
         #verify password
         if user and check_password_hash(user.password, password):
@@ -104,7 +111,7 @@ def login():
 
             return redirect(url_for('main.shop'))
         else:
-            return render_template('login.html',error='Invaliud Username and Password')
+            return render_template('login.html',error='Invalid Username and Password')
         
     return render_template('login.html', page_title='Login - Aura By Honeyy')
 
@@ -121,13 +128,13 @@ def view_cart():
     
     user_id = session['user_id']
     cart = Cart.query.filter_by(user_id=user_id).first()
-
+    
     if not cart:
         cart_items = []
         total = 0
     else:
-        cart_items = Cart.query.filter_by(cart_id=cart.id).all()
-        total = sum(item.product.price * item.quantity for item in cart_items)
+        cart_items = CartItem.query.filter_by(cart_id=cart.id).all()
+        total = sum(item.price * item.quantity for item in cart_items if len(cart_items) > 0)
 
     return render_template('cart.html', cart_items=cart_items, total=total, page_title='Shopping Cart - Aura By Honeyy')
 
@@ -140,12 +147,19 @@ def add_to_cart(product_id):
 
     user_id = session['user_id']
     cart = Cart.query.filter_by(user_id=user_id).first()
+    product = Product.query.get_or_404(product_id)
+
+    print(user_id)
+
+    if product:
+        product_price = product.price
 
     #create cart
     if not cart:
-        cart = Cart(user_id=user_id)
+        cart = Cart(user_id=user_id,quantity=quantity,price=product_price)
         db.session.add(cart)
-        db.session.commit()
+    
+    db.session.commit()
 
     #check if product already in cart
     cart_item = CartItem.query.filter_by(cart_id=cart.id, product_id=product_id).first()
@@ -156,10 +170,13 @@ def add_to_cart(product_id):
         cart_item = CartItem(
             cart_id = cart.id,
             product_id=product_id,
-            quantity=quantity
+            quantity=quantity,
+            price=product_price
         )
         db.session.add(cart_item)
     db.session.commit()
+
+    # update the 
     return redirect(url_for('main.view_cart'))
     
 @bp.route('/cart/remove/<int:cart_item_id>', methods=['POST'])
@@ -320,7 +337,7 @@ def checkout():
                 price=item.product.price
             )
             db.session.add(order_item)
-        db.session.cpmmit()
+        db.session.commit()
 
         CartItem.query.filter_by(cart_id=cart.id).delete()
         db.session.commit()
@@ -338,7 +355,7 @@ def checkout():
         page_title='Checkout - Aura by Honeyy'
     )
 
-@bp.route('/order_success/<int:order_id>')
+@bp.route('/order_success')
 def order_success(order_id):
     order = Order.query.get_or_404(order_id)
     order_item = OrderItem.query.filter_by(order_id=order_id).all()
@@ -353,4 +370,4 @@ def orders():
     user_id = session['user_id']
     orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
 
-    return render_template('orders.html', orders=orders, page_title='My Orders - Aura By Honeyy')
+    return render_template('orders.html', orders=orders, order_len=len(orders), product_details=orders, page_title='My Orders - Aura By Honeyy')

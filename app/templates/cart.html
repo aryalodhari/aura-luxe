@@ -21,16 +21,16 @@
                 {% for item in cart_items %}            
                     <tr>
                         <td>
-                            <a href="/product/{{ item.product.id }}">{{ item.product.name }}</a>
+                            <p>{{ item.product.name }}</p>
                         </td>  
-                        <td>{{ item.product.price }}</td>
+                        <td>{{ item.price }}</td>
                         <td>
                             <form action="/cart/update/{{ item.id }}" method="post" class="d-inline">
                                 <input type="number" name="quantity" value="{{ item.quantity }}" min="1" class="form-control" style="width: 80px;">
                                 <button type="submit" class="btn btn-sm btn-warning">Update</button>
                             </form>
                         </td>
-                        <td>{{ item.product.price * item.quantity }}</td>                  
+                        <td>{{ item.price * item.quantity }}</td>                  
                         <td>
                             <form action="/cart/remove/{{ item.id }}" method="post" class="d-inline">
                                 <button type="submit" class="btn btn-sm btn-danger">Remove</button>
@@ -56,5 +56,6 @@
             <p>Start Shopping to add items to your cart!</p>
             <a href="/shop" class="btn btn-primary">Continue Shopping</a>
         </div>
+
     {% endif %}
 {% endblock %}

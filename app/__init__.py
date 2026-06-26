@@ -1,10 +1,10 @@
 import os
 from flask import Flask
-from flask_sqlalchemy import SQLALchemy
+from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
 
 # initialize SQLALchemy database object
-db = SQLALchemy()
+db = SQLAlchemy()
 
 # Application factory function which create and configure flask application
 def create_app():
@@ -23,7 +23,7 @@ def create_app():
     app.config["SQLALCHEMY_DATABASE_URI"] = os.getenv("DATABASE_URI","sqlite:///aura_db")#fall backs to sqlite if db_uri not found
 
     #disable modificatiuon tracking for better performance
-    app.congif["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
+    app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
     app.config["BRAND_WHATSAPP_NUMBER"] = os.getenv("BRAND_WHATSAPP_NUMBER",9199999999)#for business contact
 

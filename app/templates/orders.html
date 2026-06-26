@@ -25,7 +25,7 @@
                             <td><strong>{{ order.order_number }}</strong></td>
                             <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
                             <td>
-                                {% set item_count = order.order_item|length %}
+                                {% set item_count = orders | length %}
                                 {{ item_count }}
                                 {% if item_count == 1 %}
                                     item
@@ -45,6 +45,7 @@
                                     <span class="badge bg-success">Delivered</span>
                                 {% elif order.status == 'cancelled' %}
                                     <span class="badge bg-danger">Cancelled</span>
+                                {% endif %}
                             </td>
                             <td>
                                 <a href="#order-{{ order.id }}" class="btn btn-sm btn-outline-primary" data-bs-toggle="collapse">View Details</a>
@@ -68,14 +69,14 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                    {% for item in order.order_items %}
+                                                        {# {% for item in product_details %}
                                                         <tr>
-                                                            <td>{{ item.product.name }}</td>
+                                                            <td>{{ item.name }}</td>
                                                             <td>{{ item.quantity }}</td>
                                                             <td>{{ item.price }}</td>
                                                             <td>{{ item.price * item.quantity }}</td>
                                                         </tr>
-                                                    {% endfor %}
+                                                     {% endfor %} #}
                                                 </tbody>
                                             </table>
                                         </div>
@@ -87,7 +88,7 @@
 
                                         <h6>Order summary</h6>
                                         <p>
-                                            Total Items: {{ order.order_items|length }} <br>
+                                            Total Items: {{ order_len }} <br>
                                             Total Ammount: <strong>{{ order.total_amount }}</strong> <br>
                                              Status: 
                                             {% if order.status == 'delivered' %}

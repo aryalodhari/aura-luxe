@@ -1,25 +1,35 @@
 from app import db
 from datetime import datetime
+from werkzeug.security import generate_password_hash, check_password_hash
+from sqlalchemy.orm import relationship
 
 #user /customer account information 
 class User(db.Model):
     __tablename__ = "users"
 
     id = db.Column(db.Integer, primary_key=True)
-    username = db.Column(db.string(100), nullabel=False, unique=True)
-    email = db.Column(db.string(100), nullabel=False, unique=True)
-    password = db.Column(db.string(225), nullabel=False)
-    first_name = db.Column(db.string(100))
-    last_name = db.Column(db.string(100))
-    phone = db.Column(db.string(20))
+    username = db.Column(db.String(100), nullable=False, unique=True)
+    email = db.Column(db.String(100), nullable=False, unique=True)
+    password = db.Column(db.String(225), nullable=False)
+    first_name = db.Column(db.String(100))
+    last_name = db.Column(db.String(100))
+    phone = db.Column(db.String(20))
     address = db.Column(db.Text)
-    city = db.Column(db.string(100))
-    state = db.Column(db.string(100))
-    pincode = db.Column(db.string(10))
-    country = db.Column(db.string(100), default="India")
+    city = db.Column(db.String(100))
+    state = db.Column(db.String(100))
+    pincode = db.Column(db.String(10))
+    country = db.Column(db.String(100), default="India")
     is_admin = db.Column(db.Boolean, default=False)
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+
+    def set_password(self, password):
+        """Hash and set password"""
+        self.password = generate_password_hash(password)
+    
+    def check_password(self, password):
+        """Check password against hash"""
+        return check_password_hash(self.password, password)
 
     def __repr__(self):
         return f"<User {self.username}>"
@@ -29,9 +39,10 @@ class Category(db.Model):
     __tablename__ = "categories"
 
     id = db.Column(db.Integer, primary_key=True)
-    name = db.Column(db.string(100), nullable=False, unique=True)
+    name = db.Column(db.String(100), nullable=False, unique=True)
+    # slug = db.Column(db.String(120), nullable=False, unique=True) 
     description = db.Column(db.Text)
-    image_url = db.Column(db.string(225))
+    image_url = db.Column(db.String(225))
     created_at = db.Column(db.DateTime, default=db.func.now())
 
     def __repr__(self):
@@ -44,11 +55,11 @@ class Product(db.Model):
 
     id = db.Column(db.Integer, primary_key=True)
     name = db.Column(db.String(200), nullable=False)
+    # slug = db.Column(db.String(220), nullable=False, unique=True)  
     description = db.Column(db.Text)
     price = db.Column(db.Float, nullable=False)
-    cost_price = db.Column(db.Float)
     stock = db.Column(db.Integer, default=0)
-    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)
+    category_id = db.Column(db.Integer, db.ForeignKey('categories.id'), nullable=False)  
     image_url = db.Column(db.String(255))
     sku = db.Column(db.String(50), unique=True)
     is_active = db.Column(db.Boolean, default=True)
@@ -64,9 +75,11 @@ class Cart(db.Model):
     __tablename__ = "carts"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    price = db.Column(db.Integer)
+    quantity = db.Column(db.Integer, default=1)
 
     def __repr__(self):
         return f"<Cart for user {self.user_id}>"
@@ -76,10 +89,14 @@ class CartItem(db.Model):
     __tablename__ = "cart_items"
     
     id = db.Column(db.Integer, primary_key=True)
-    cart_id = db.Column(db.Integer, db.ForeignKey('carts.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    cart_id = db.Column(db.Integer, db.ForeignKey('carts.id'), nullable=False)  
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)  
     quantity = db.Column(db.Integer, default=1)
     added_at = db.Column(db.DateTime, default=db.func.now())
+    price = db.Column(db.Integer)
+
+    # relation ship for the product
+    product = relationship("Product", backref="cart_items")
     
     def __repr__(self):
         return f"<CartItem Product {self.product_id} x{self.quantity}>"
@@ -89,7 +106,7 @@ class Order(db.Model):
     __tablename__ = "orders"
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  
     order_number = db.Column(db.String(50), unique=True)
     total_amount = db.Column(db.Float, nullable=False)
     discount_amount = db.Column(db.Float, default=0)
@@ -97,7 +114,6 @@ class Order(db.Model):
     status = db.Column(db.String(20), default="pending")
     shipping_address = db.Column(db.Text)
     payment_method = db.Column(db.String(50))
-    payment_status = db.Column(db.String(20), default="pending")
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
@@ -111,10 +127,12 @@ class OrderItem(db.Model):
     __tablename__ = "order_items"
 
     id = db.Column(db.Integer, primary_key=True)
-    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)  
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)  
     quantity = db.Column(db.Integer, nullable=False)
     price = db.Column(db.Float, nullable=False)
+
+    product = relationship("Product", backref="orders")
 
     def __repr__(self):
         return f"<OrderItem Order {self.order_id} Product {self.product_id}>"
@@ -125,11 +143,11 @@ class Review (db.Model):
     __tablename__ = "reviews"
 
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
-    rating = db.Column(db.Ingeter)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)  
+    rating = db.Column(db.Integer)
     comment = db.Column(db.Text)
-    title = db.Column(db.string(200))
+    title = db.Column(db.String(200))
     is_verified = db.Column(db.Boolean, default=False)
     helpful_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=db.func.now())
@@ -142,8 +160,8 @@ class WishList(db.Model):
     __tablename__ = "wishlists"
     
     id = db.Column(db.Integer, primary_key=True)
-    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
-    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)  
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)  
     added_at = db.Column(db.DateTime, default=db.func.now())
     
     def __repr__(self):
@@ -157,7 +175,8 @@ class DiscountCode(db.Model):
     code = db.Column(db.String(50), unique=True, nullable=False)
     description = db.Column(db.Text)
     discount_type = db.Column(db.String(20))
-    discount_value = db.Column(db.Float, nullable=False)
+    discount_value = db.Column(db.Float, nullable=False),
+    discount_percent = db.Column(db.Integer)
     minimum_purchase = db.Column(db.Float, default=0)
     max_usage = db.Column(db.Integer)
     usage_count = db.Column(db.Integer, default=0)
@@ -184,6 +203,3 @@ class ContactMessage(db.Model):
     
     def __repr__(self):
         return f"<ContactMessage from {self.email}>"
-
-
-

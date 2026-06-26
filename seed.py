@@ -1,7 +1,7 @@
 from app import create_app, db
 from app.models import (
-    User, Category, Product, Cart, 
-    DiscountCode, ContactMessage
+    Category, Product, 
+    DiscountCode
 )
 from werkzeug.security import generate_password_hash
 from datetime import datetime
@@ -17,6 +17,26 @@ with app.app_context():
     print("🏗️  Creating all tables...")
     db.create_all()
 
+        # Categories
+    print("\n📂 Creating categories...")
+
+    categories_data = [
+        {'name': 'Bags', 'description': 'Hand Bags accessories'},
+        {'name': 'Sunglasses', 'description': 'Sunglasses accessories'},
+        {'name': 'Shoes', 'description': 'Shoes snd sneaker products'},
+    ]
+
+    categories = []
+    for c_data in categories_data:
+        category = Category(
+            name=c_data['name'],
+            description=c_data['description']
+        )
+        db.session.add(category)
+        categories.append(category)
+    db.session.commit()
+    print(f"✅ Created {Category.query.count()} categories")
+
     #  product data
     print("\n📦 Creating products...")
     
@@ -28,7 +48,7 @@ with app.app_context():
             'price': 3499,
             'stock': 12,
             'category_id': 1,
-            'image': 'product_1.jpg',
+            'image_url': 'product_1.jpg',
             'sku': 'AURA-SHOULDER_BAG-001'
         },
         {
@@ -37,7 +57,7 @@ with app.app_context():
             'price': 4299,
             'stock': 8,
             'category_id': 1,
-            'image': 'product_2.jpg',
+            'image_url': 'product_2.jpg',
             'sku': 'AURA-CROSSBODY_BAG-GOLD'
         },
         {
@@ -46,7 +66,7 @@ with app.app_context():
             'price': 3999,
             'stock': 10,
             'category_id': 1,
-            'image': 'product_3.jpg',
+            'image_url': 'product_3.jpg',
             'sku': 'AURA-TOTE_MINI_BAG-001'
 
         },
@@ -56,7 +76,7 @@ with app.app_context():
             'price': 4999,
             'stock': 7,
             'category_id': 1,
-            'image': 'product_11.jpg',
+            'image_url': 'product_11.jpg',
             'sku': 'AURA-QUILTED_BAG-001'
         },
         {
@@ -65,7 +85,7 @@ with app.app_context():
             'price': 3799,
             'stock': 10,
             'category_id': 1,
-            'image': 'product_12.jpg',
+            'image_url': 'product_12.jpg',
             'sku': 'AURA-CITY-TOTE_BAG-001'
         },
         {
@@ -74,7 +94,7 @@ with app.app_context():
             'price': 55399,
             'stock': 5,
             'category_id': 1,
-            'image': 'product_13.jpg',
+            'image_url': 'product_13.jpg',
             'sku': 'AURA-HANDBAG-BLACK'
         },
         {
@@ -83,7 +103,7 @@ with app.app_context():
             'price': 4899,
             'stock': 6,
             'category_id': 1,
-            'image': 'product_14.jpg',
+            'image_url': 'product_14.jpg',
             'sku': 'AURA-TOTE_BAG-CREAM'
         },
         
@@ -94,7 +114,7 @@ with app.app_context():
             'price': 1499,
             'stock': 20,
             'category_id': 2,
-            'image': 'product_4.jpg',
+            'image_url': 'product_4.jpg',
             'sku': 'AURA-SUNGLASSES-BLACK'
         },
         {
@@ -103,7 +123,7 @@ with app.app_context():
             'price': 2299,
             'stock': 15,
             'category_id': 2,
-            'image': 'product_5.jpg',
+            'image_url': 'product_5.jpg',
             'sku': 'AURA-OVERSIZED-BOLD'
         },
         {
@@ -112,7 +132,7 @@ with app.app_context():
             'price': 1999,
             'stock': 18,
             'category_id': 2,
-            'image': 'product_6.jpg',
+            'image_url': 'product_6.jpg',
             'sku': 'AURA-FRAME-SQUARE'
         },
         {
@@ -121,7 +141,7 @@ with app.app_context():
             'price': 2499,
             'stock': 14,
             'category_id': 2,
-            'image': 'product_7.jpg',
+            'image_url': 'product_7.jpg',
             'sku': 'AURA-SUNGLASSES-001'
         },
         {
@@ -130,7 +150,7 @@ with app.app_context():
             'price': 2699,
             'stock': 14,
             'category_id': 2,
-            'image': 'product_15.jpg',
+            'image_url': 'product_15.jpg',
             'sku': 'AURA-RUNWAY-REC'
         },
         {
@@ -139,7 +159,7 @@ with app.app_context():
             'price': 2199,
             'stock': 16,
             'category_id': 2,
-            'image': 'product_16.jpg',
+            'image_url': 'product_16.jpg',
             'sku': 'AURA-MONO-001'
         },
         {
@@ -148,7 +168,7 @@ with app.app_context():
             'price': 2899,
             'stock': 8,
             'category_id': 2,
-            'image': 'product_17.jpg',
+            'image_url': 'product_17.jpg',
             'sku': 'AURA-TORTOISE-001'
         },
         {
@@ -157,7 +177,7 @@ with app.app_context():
             'price': 2599,
             'stock': 13,
             'category_id': 2,
-            'image': 'product_18.jpg',
+            'image_url': 'product_18.jpg',
             'sku': 'AURA-GLAM-001'
         },
         #shoes
@@ -167,7 +187,7 @@ with app.app_context():
             'price': 3499,
             'stock': 9,
             'category_id': 3,
-            'image': 'product_8.jpg',
+            'image_url': 'product_8.jpg',
             'sku': 'AURA-SNEAKERS-BLACK'
         },
         {
@@ -176,7 +196,7 @@ with app.app_context():
             'price': 2999,
             'stock': 11,
             'category_id': 3,
-            'image': 'product_9.jpg',
+            'image_url': 'product_9.jpg',
             'sku': 'AURA-SNEAKERS-WHITE'
         },
         {
@@ -185,7 +205,7 @@ with app.app_context():
             'price': 4599,
             'stock': 6,
             'category_id': 3,
-            'image': 'product_10.jpg',
+            'image_url': 'product_10.jpg',
             'sku': 'AURA-SNEAKERS-001'
         }
     ]
@@ -193,39 +213,17 @@ with app.app_context():
     products = []
     for p_data in product_data:
         product = Product(
-            name=p_data('name'),
-            description=p_data('description'),
-            price=p_data('price'),
-            stock=p_data('stock'),
-            category_id=p_data('category_id'),
-            image=p_data('image'),
-            sku=p_data('sku')
+            name=p_data['name'],
+            description=p_data['description'],
+            price=p_data['price'],
+            stock=p_data['stock'],
+            category_id=p_data['category_id'],
+            image_url=p_data['image_url']
         )
         db.session.add(product)
         products.append(product)
     db.session.commit()
     print(f"✅ Created {Product.query.count()} products")
-
-    
-    # Categories
-    print("\n📂 Creating categories...")
-
-    categories_data = [
-        {'name': 'Bages', 'description': 'Hand Bags accessories'},
-        {'name': 'Sunglasses', 'description': 'Sunglasses accessories'},
-        {'name': 'Shoes', 'description': 'Shoes snd sneaker products'},
-    ]
-
-    categories = []
-    for c_data in categories_data:
-        category = Category(
-            name=c_data('name'),
-            description=c_data('description')
-        )
-        db.session.add(category)
-        categories.append(category)
-    db.session.commit()
-    print(f"✅ Created {Category.query.count()} categories")
 
     # Discount Codes
     print("\n🎉 Creating discount codes...")
