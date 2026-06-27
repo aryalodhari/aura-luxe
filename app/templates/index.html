@@ -3,11 +3,17 @@
 {% block title %} Home - Aura By Honeyy {% endblock %}
 
 {% block content %}
-    <div class="jumbotron bg-light py-5 rounded">
+    <div class="jumbotron bg-light py-5 px-5">
         <h1 class="display-4">Welcome to Aura ✨</h1>
-        <p class="lead">Discover premium beauty and skincare products for your daily routine.</p>
-        <hr class="my-4">
-        <a class="btn btn-primary btn-lg" href="/shop" role="button">Shop Now</a>
+        <p class="lead">Step into a world of uncompromising luxury and bold sophistication.<br> At AURA, we curate a premium selection of high-end items that blend <br> fierce elegance with modern chic comfort. Explore our collection and <br> find the perfect statement pieces to complement your exceptional lifestyle.</p>
+        <a class="btn btn-gold btn-lg" href="/shop" role="button">Shop Now</a>
+        <a class="btn btn-outline-light ms-3" href="/about">Our Story</a>
+        {# <div class="col-lg-6">
+        <img
+          class="hero-img"
+          src="{{ url_for('static', filename='uploads/product/product_5.jpg') }}"
+        />
+      </div> #}
     </div>
 
     <div class="container my-5">
@@ -19,7 +25,7 @@
                     <div class="col-md-4 mb-4">
                         <div class="card">
                             <div class="card-body">
-                                <img src="/static/uploads/product/{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%;height:100%;justify-content: center;object-fit: cover;">
+                                <img src="/static/uploads/product/{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%;height:65%;justify-content: center;object-fit: cover;">
                                 <h5 class="card-title">{{ product.name }}</h5>
                                 <p class="card-text">{{ product.description[:100] }}...</p>
                                 <p class="h5 text-primary">{{ product.price }}</p>

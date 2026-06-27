@@ -10,8 +10,11 @@
     <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
 </head>
 <body>
-    <nav class="navbar navbar-expand-lg navbar-light bg-light">
+    <nav class="navbar navbar-expand-lg navbar-light">
         <div class="container">
+
+            <img src="{{ url_for('static', filename='uploads/brand_logo/aura_logo.PNG') }}" alt="">
+
             <a class="navbar-brand" href="/">
                 <strong>✨ Aura by Honeyy</strong>
             </a>
@@ -19,6 +22,7 @@
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
                 <span class="navbar-toggler-icon"></span>
             </button>
+
 
             <div class="collapse navbar-collapse" id="navbarNav">
                 <ul class="navbar-nav ms-auto">
@@ -61,6 +65,7 @@
                 </ul>
             </div>
         </div>
+        
     </nav>
 
     {% with messages = get_flashed_messages(with_categories=true) %}
@@ -74,11 +79,9 @@
         {% endif %}
     {% endwith %}
 
-    <main class="container my-5">
-        {% block content %}{% endblock %}
-    </main>
+    {% block content %}{% endblock %}
 
-    <footer class="bg-light mt-5 py-4">
+    <footer class="mt-5 py-4">
         <div class="container">
             <div class="row">
                 <div class="col-md-4">
@@ -102,7 +105,7 @@
                 </div>
             </div>
             <hr>
-            <p class="text-center text-muted">
+            <p class="text-center" style="color: white;">
                 &copy; 2024 Aura by Honeyy. All rights reserved.
             </p>
         </div>

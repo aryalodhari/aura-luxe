@@ -3,12 +3,15 @@
 {% block title %}About Us - Aura by Honeyy{% endblock %}
 
 {% block content %}
+    <section class="page-hero">
     <h1>About Aura by Honeyy</h1>
-    <hr>
+    <p>Premium curated fashion collection.</p>
+    </section>
     
-    <div class="row">
-        <div class="col-md-6">
-            <h2>Our Story</h2>
+    
+    <div class="row p-4 m-3 g-2">
+            <div class="col-md-6" style="margin-right: 10px;">
+            <h2 style="color: black;">Our Story</h2>
             <p>
                 Aura by Honeyy was founded with a mission to bring premium beauty and skincare 
                 products directly to our customers. We believe that everyone deserves access to 
@@ -20,9 +23,10 @@
                 and tested for quality and effectiveness.
             </p>
         </div>
-        
-        <div class="col-md-6">
-            <h2>Our Mission</h2>
+
+
+         <div class="col-md-5" style="justify-content: center; align-items: center;">
+            <h2 style="color: black;">Our Mission</h2>
             <ul class="list-unstyled">
                 <li>✓ Provide premium beauty products</li>
                 <li>✓ Ensure 100% authenticity</li>
@@ -34,62 +38,60 @@
         </div>
     </div>
     
-    <hr class="my-5">
     
-    <h2>Why Choose Aura?</h2>
-    <div class="row">
-        <div class="col-md-3">
-            <div class="card text-center">
+    <h2 style="color: black; margin-left: 37px;">Why Choose Aura?</h2>
+    <div class="row p-4 m-2">
+        <div class="col-md-4">
+            <div class="card-about text-center" style="height: 300px; background-color: #510d0d;">
                 <div class="card-body">
                     <h4>💎</h4>
                     <h5>Premium Quality</h5>
-                    <p class="card-text">Hand-selected products from trusted international brands.</p>
+                    <p style="color: white;">Hand-selected products from trusted international brands.</p>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3">
-            <div class="card text-center">
+        <div class="col-md-4">
+            <div class="card-about text-center" style="height: 300px; background-color: #510d0d;">
                 <div class="card-body">
                     <h4>🚚</h4>
                     <h5>Fast Delivery</h5>
-                    <p class="card-text">Quick and reliable shipping across the country.</p>
+                    <p style="color: white;">Quick and reliable shipping across the country.</p>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3">
-            <div class="card text-center">
+        <div class="col-md-4">
+            <div class="card-about  text-center" style="height: 300px; background-color: #510d0d;">
                 <div class="card-body">
                     <h4>✓</h4>
                     <h5>100% Authentic</h5>
-                    <p class="card-text">All products guaranteed authentic with certificates.</p>
+                    <p style="color: white;">All products guaranteed authentic with certificates.</p>
                 </div>
             </div>
         </div>
         
-        <div class="col-md-3">
-            <div class="card text-center">
+        {# <div class="col-md-4">
+            <div class="card  text-center">
                 <div class="card-body">
                     <h4>💬</h4>
-                    <h5>Great Support</h5>
+                    <h5 style="color: black;">Great Support</h5>
                     <p class="card-text">Dedicated customer service available 24/7.</p>
                 </div>
             </div>
         </div>
-    </div>
+    </div> #}
     
-    <hr class="my-5">
     
-    <h2>Our Team</h2>
+    <h2 style="color: black;">Our Team</h2>
     <p>
         Aura by Honeyy is run by a passionate team of beauty enthusiasts who are committed to 
         bringing you the best products and service. We're always looking for ways to improve 
         and better serve our customers.
     </p>
     
-    <div class="alert alert-info">
+    <div style="background-color: #510d0d; height: 100px;">
         <h4>Questions or Feedback?</h4>
-        <p>We'd love to hear from you! <a href="/contact">Contact us here</a></p>
+        <p style="color: white;">We'd love to hear from you! <a style="color: #d7b16f;" href="/contact">Contact us here</a></p>
     </div>
 {% endblock %}

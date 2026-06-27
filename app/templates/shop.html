@@ -3,12 +3,14 @@
 {% block title %} Shop - Aura By Honeyy{% endblock %}
 
 {% block content %}
-    <h1>Our Products</h1>
-    <hr>
+    <section class="page-hero">
+    <h1>Shop AURA</h1>
+    <p>Premium curated fashion collection.</p>
+    </section>
 
-    
+    <div class="p-5">
     <div class="mb-4">
-        <h5>Filter by Category:</h5>
+        <h5 style="color: black;">Filter by Category:</h5>
         <div class="btn-group" role="group">
             <a href="/shop" class="btn btn-outline-primary">All</a>
             {% for category in categories %}
@@ -22,7 +24,7 @@
     {% if products %}
         <div class="row">
             {% for product in products  %}
-                <div class="col-md-3 mb-4">
+                <div class="col-md-3  m-5">
                     <div class="card h-100">
                         <div class="card-body">
                             <img src="/static/uploads/product/{{ product.image_url }}" alt="{{ product.name }}" style="width: 90%;height: 50%; justify-content: center;margin-bottom: 4px;">
@@ -55,6 +57,7 @@
             <p>No products available. Check back soon!</p>
         </div>
     {% endif %}
+    </div>
 
 
 {% endblock %}

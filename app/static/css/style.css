@@ -1,27 +1,63 @@
 /* Custom Aura Styling */
-
+:root {
+    --wine: #4b0615;
+    --gold: #d7b16f;
+    --black: #111;
+    --cream: #fbf7f0
+}
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background-color: #f8f9fa;
+    background: var(--cream);
 }
 
-.navbar {
+.navbar{
     box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    /* background: rgba(75, 6, 21, .95); */
+    background-color: white;
+    color: #510d0d;
+    
+    
 }
-
+.nav-link {
+    color: var(--wine);
+    border-color: var(--wine);
+}
+.nav-link:hover {
+    background: var(--wine);
+    color: white;
+}
 .navbar-brand {
     font-size: 1.5rem;
-    color: #e91e63 !important;
+    color: var(--wine) !important;
+}
+.navbar img {
+    width: 62px;
+    height: 62px;
+    border-radius: 12%;
+    object-fit: cover;
+    margin: auto;
+    
+    
+
 }
 
 .card {
     border: none;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: transform 0.3s;
+    height: 550px;
+    width: 400px;
+    margin-top: 10px;
 }
 
 .card:hover {
     transform: translateY(-5px);
+    box-shadow: 0 18px 40px rgba(0, 0, 0, .12)
+
+}
+.cart-about {
+    height: 400px;
+    width: 500px;
 }
 
 .btn-primary {
@@ -40,28 +76,59 @@ body {
 
 footer {
     border-top: 1px solid #ddd;
+    background: #130006;
+    color: white;
 }
+ footer a {
+    color: var(--gold)
+
+ }
+ footer h5 {
+    color: var(--cream);
+ }
 
 .jumbotron {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: radial-gradient(circle at 70% 20%, #7a1028, var(--wine) 45%, #130006);
     color: white;
+    height: 400px;
 }
 
 .jumbotron h1 {
     font-weight: 700;
+    color: var(--cream);
+}
+.jumbotron p {
+    font-weight: 300;
+    color: var(--cream);
+}
+.page-hero{
+    padding: 100px 20px 70px;
+    background: linear-gradient(135deg, var(--wine), #160007);
+    color: white;
+    text-align: center;
+    font-weight: 500;
+}
+/* .hero-img{
+    width: 50%;
+    border-radius: 28px;
+    box-shadow: 0 30px 80px rgba(0, 0, 0, .35);
+    object-fit: cover
+} */
+.btn-gold {
+    background: var(--gold)
+}
+.btn-gold:hover{
+    background-color: #edbc68;
 }
 
-.jumbotron .btn {
-    background-color: #e91e63;
-    border-color: #e91e63;
+.btn-primary {
+    background: var(--wine);
+    border-color: #ebe6e9;
 }
 
-h1, h2, h3, h4, h5 {
-    color: #333;
-}
 
 .text-primary {
-    color: #e91e63 !important;
+    color: #7a75f6 !important;
 }
 
 .badge {
