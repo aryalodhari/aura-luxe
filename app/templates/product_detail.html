@@ -3,8 +3,8 @@
 
 {% block content %}
     <div class="row">
-        <div class="col-md-6">
-            <div class="card">
+        <div class="col-md-4">
+            <div class="pd-card p-2">
                 <div class="card-body">
                     <img src="/static/uploads/product/{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%;height:100%;justify-content: center;object-fit: cover;">
                     <h2>{{ product.name }}</h2>
@@ -32,9 +32,12 @@
             </div>
         </div>
 
-        <div class="col-md-6">
-            <div class="card">
+        <div class="col-md-4">
+            <div class="review-card p-3">
                 <div class="card-body">
+                    {% if error %} 
+                        <p style="color: red;">{{ error }}</p>
+                    {% endif %}
                     <h3>Customer Review</h3>
                     {% if 'user_id' in session %}
                         <form action="/product/{{ product.id }}/review" class="mb-3" method="post">
@@ -81,18 +84,18 @@
                     {% endif %}
                 </div>
             </div>
-
-            {% if similar_products %}
-                <div class="card mt-4">
+        </div>
+        <div class="col-md-4">
+             {% if similar_products %}
+                <div class="similar-card mt-4 p-3">
                     <div class="card-body">
                         <h5>Similar Products</h5>
                         {% for product in similar_products %}
-                        <div class="mb-3">
+                            <img src="/static/uploads/product/{{ product.image_url }}" alt="{{ product.name }}" style="width: 40%;height:30%;object-fit: cover;">
                             <a href="/product/{{ product.id }}">
                                 <strong>{{ product.name }}</strong>
                             </a>
                             <p class="text-primary">{{ product.price }}</p>
-                        </div>
                         {% endfor %}
                     </div>
                 </div>

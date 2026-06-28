@@ -3,11 +3,10 @@
 {% block title %}Checkout - Aura By Honey{% endblock %}
 
 {% block content %}
-    <h1>Checkout</h1>
-    <hr>
+    <section class="page-hero"><h1>CkeckOut</h1></section>
 
     <div class="row">
-        <div class="col-md-6">
+        <div class="col-md-6 p-5">
             <h3>Order Summary</h3>
 
             {% if cart_items %}
@@ -37,22 +36,22 @@
         </div>
 
         <!--Checkout form -->
-        <div class="col-md-6">
+        <div class="p-5">
             <h3>Shipping Details</h3>
 
             {% if cart_items %}
                 <form method="post">
                     <div class="mb-3">
                         <label for="address">Shipping Address</label>
-                        <textarea name="address" id="address" placeholder="Enter your complete address" class="form-control" required></textarea>
+                        <textarea name="address" id="address" placeholder="Enter your complete address" class="form-control" style="width: 400px; height: 80px;"required></textarea>
                     </div>
-                    <div class="alert alert-info">
+                    <div class="alert alert-info" style="width: 400px;">
                         <p><strong>Payment Method:</strong>Case on Delivery</p>
                         <p>Pay when your order arrives at your doorstep.</p>
                     </div>
-                    <button type="submit" class="btn btn-success btn-lg w-100">Complete Order</button>
+                    <button type="submit" class="btn btn-success btn-lg w-20">Complete Order</button>
                 </form>
-                {% endif %}
+            {% endif %}
         </div>
     </div>
 {% endblock %}

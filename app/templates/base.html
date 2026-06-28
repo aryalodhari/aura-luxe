@@ -71,9 +71,9 @@
     {% with messages = get_flashed_messages(with_categories=true) %}
         {% if messages %}
             {% for category, message in messages %}
-                <div class="alert aleart-{{ category }} aleart-dismissivle fade show" role="alert">
-                    {{ message }}
-                    <button type="button" class="btn-close" data-bs-dismiss="aleart"></button>
+                <div id="messagepanel" class="text-{{ category }} alert-dismissivle fade show" role="alert" style="display:flex; text-align: center; justify-content: center;margin-top: 10px;">
+                    <p style="background-image: linear-gradient(to right, rgba(74, 11, 13, 0.634), rgb(220, 96, 96)); padding: 5px;color: rgb(226, 191, 32);border-radius: 5px;">{{ message }}</p>
+                    <button type="button" id="btn" class="btn-close btn btn-danger" data-bs-dismiss="alert" style="margin-top: 4px;padding: 5px; margin-left: 1px;"></button>
                 </div>
             {% endfor %}
         {% endif %}

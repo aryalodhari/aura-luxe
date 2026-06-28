@@ -151,6 +151,7 @@ class Review (db.Model):
     is_verified = db.Column(db.Boolean, default=False)
     helpful_count = db.Column(db.Integer, default=0)
     created_at = db.Column(db.DateTime, default=db.func.now())
+    user = relationship("User", backref="reviews")
 
     def __repr__(self):
         return f"<Review by User {self.user_id} For Product {self.product_id}>"

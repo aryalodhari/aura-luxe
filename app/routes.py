@@ -1,4 +1,4 @@
-from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify
+from flask import Blueprint, render_template, request, redirect, url_for, session, jsonify, flash
 from app import db
 from app.models import (
     User, Product, Category, Cart, CartItem, Order, OrderItem,
@@ -7,6 +7,7 @@ from app.models import (
 from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
+from sqlalchemy import select
 
 bp = Blueprint('main',__name__)
 
@@ -42,7 +43,7 @@ def product_detail(product_id):
 
     reviews = Review.query.filter_by(product_id=product_id).all()
 
-    similar_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(4).all()
+    similar_products = Product.query.filter(Product.category_id == product.category_id, Product.id != product_id).limit(3).all()
 
     return render_template('product_detail.html', product=product, reviews=reviews, similar_products=similar_products, page_title=f"{product.name} - Aura by Honeyy")
 
@@ -210,8 +211,15 @@ def add_review(product_id):
     user_id = session['user_id']
     rating = request.form.get('rating', type=int)
     comment = request.form.get('comment')
-    
-    review = Review(
+
+    # find the user first in the database with the same product_id
+    existingReviewUser = Review.query.filter(user_id == user_id, product_id == product_id).first()
+
+    if existingReviewUser:
+        flash("Review already submitted", "danger")
+        return redirect(url_for('main.product_detail', product_id=product_id))
+    else:
+        review = Review(
         user_id=user_id,
         product_id=product_id,
         rating=rating,

@@ -45,11 +45,54 @@ body {
     border: none;
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     transition: transform 0.3s;
-    height: 550px;
+    height: 570px;
     width: 400px;
     margin-top: 10px;
 }
+.pd-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+    height: 900px;
+    width: 400px;
+    margin-top: 15px;
+    margin-left: 30px;
+}
+.review-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+    height: 430px;
+    width: 430px;
+    margin-top: 20px;
+    
+}
+.show-review{
+    display: block;
+}
+.close-review {
+    display: none;
+}
 
+.similar-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+    height: 700px;
+    width: 450px;
+    margin-top: 10px;
+}
+.log-card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+    height: 500px;
+    width: 450px;
+    margin-top: 30px;
+    margin-left: 500px;
+}
+.log-row {
+    background: linear-gradient(90deg,rgba(255, 240, 240, 1) 0%, rgba(255, 249, 204, 1) 35%);}
 .card:hover {
     transform: translateY(-5px);
     box-shadow: 0 18px 40px rgba(0, 0, 0, .12)

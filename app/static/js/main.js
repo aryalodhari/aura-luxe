@@ -25,3 +25,9 @@ document.addEventListener('DOMContentLoaded', function() {
 function formatCurrency(amount) {
     return '₹' + parseFloat(amount).toFixed(2);
 }
+
+// for close the messagePanel from the jinja
+const btn = document.getElementById("btn")
+btn.addEventListener("click", function(e){
+    document.getElementById("messagepanel").style.display = "none";
+})
