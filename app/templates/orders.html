@@ -26,7 +26,8 @@
                             <td><strong>{{ order.order_number }}</strong></td>
                             <td>{{ order.created_at.strftime('%Y-%m-%d') }}</td>
                             <td>
-                                {% set item_count = orders | length %}
+                                <!-- Count the items in specific order -->
+                                {% set item_count = order.items | length %}
                                 {{ item_count }}
                                 {% if item_count == 1 %}
                                     item
@@ -70,14 +71,14 @@
                                                     </tr>
                                                 </thead>
                                                 <tbody>
-                                                        {# {% for item in product_details %}
+                                                        {% for item in order.items %}
                                                         <tr>
-                                                            <td>{{ item.name }}</td>
+                                                            <td>{{ item.product.name }}</td>
                                                             <td>{{ item.quantity }}</td>
                                                             <td>{{ item.price }}</td>
                                                             <td>{{ item.price * item.quantity }}</td>
                                                         </tr>
-                                                     {% endfor %} #}
+                                                     {% endfor %}
                                                 </tbody>
                                             </table>
                                         </div>
@@ -89,7 +90,8 @@
 
                                         <h6>Order summary</h6>
                                         <p>
-                                            Total Items: {{ order_len }} <br>
+                                            <!-- FIX: Use the item_count variable we set earlier -->
+                                            Total Items: {{ item_count }} <br>
                                             Total Ammount: <strong>{{ order.total_amount }}</strong> <br>
                                              Status: 
                                             {% if order.status == 'delivered' %}

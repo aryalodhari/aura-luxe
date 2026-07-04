@@ -349,7 +349,7 @@ def checkout():
 
         CartItem.query.filter_by(cart_id=cart.id).delete()
         db.session.commit()
-        return redirect(url_for('main.order_success'), order_id=order.id)
+        return redirect(url_for('main.order_success', order_id=order.id))
     
     user_id = session['user_id']
     cart = Cart.query.filter_by(user_id=user_id).first()
@@ -363,7 +363,7 @@ def checkout():
         page_title='Checkout - Aura by Honeyy'
     )
 
-@bp.route('/order_success')
+@bp.route('/order_success/<int:order_id>')
 def order_success(order_id):
     order = Order.query.get_or_404(order_id)
     order_item = OrderItem.query.filter_by(order_id=order_id).all()

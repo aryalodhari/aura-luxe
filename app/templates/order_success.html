@@ -6,7 +6,7 @@
     <div class="text-center">
         <h1 class="text-success mb-4">✅ Order Confirmed!</h1>
         
-        <div class="card">
+        <div class="ord_succ_card">
             <div class="card-body">
                 <h3>Thank you for your order</h3>
                 
@@ -22,7 +22,7 @@
                 
                 <h5>Items Ordered:</h5>
                 <ul class="list-group">
-                    {% for item in order_items %}
+                    {% for item in order_item %}
                         <li class="list-group-item">
                             {{ item.product.name }} × {{ item.quantity }} = ₹{{ item.price * item.quantity }}
                         </li>

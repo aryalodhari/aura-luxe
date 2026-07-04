@@ -117,6 +117,8 @@ class Order(db.Model):
     notes = db.Column(db.Text)
     created_at = db.Column(db.DateTime, default=db.func.now())
     updated_at = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    #links the Order to its OrderItems
+    items = relationship("OrderItem", backref="order", lazy=True)
     
     def __repr__(self):
         return f"<Order {self.order_number}>"

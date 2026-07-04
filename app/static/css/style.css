@@ -67,6 +67,15 @@ body {
     margin-top: 20px;
     
 }
+.ord_succ_card {
+    border: none;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    transition: transform 0.3s;
+    height: 450px;
+    width: 430px;
+    margin-top: 20px;
+    margin-left: 37%;
+}
 .show-review{
     display: block;
 }
@@ -133,7 +142,7 @@ footer {
 .jumbotron {
     background: radial-gradient(circle at 70% 20%, #7a1028, var(--wine) 45%, #130006);
     color: white;
-    height: 400px;
+    height: 580px;
 }
 
 .jumbotron h1 {
@@ -151,12 +160,10 @@ footer {
     text-align: center;
     font-weight: 500;
 }
-/* .hero-img{
-    width: 50%;
-    border-radius: 28px;
+.hero-img{
     box-shadow: 0 30px 80px rgba(0, 0, 0, .35);
-    object-fit: cover
-} */
+    object-fit: cover;
+}
 .btn-gold {
     background: var(--gold)
 }
