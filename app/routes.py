@@ -379,3 +379,106 @@ def orders():
     orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
 
     return render_template('orders.html', orders=orders, order_len=len(orders), product_details=orders, page_title='My Orders - Aura By Honeyy')
+
+# ----------------------------- ADMIN ROUTES ---------------------------------------
+
+@bp.route('/admin')
+def admin_dashboard():
+    """Admin dashboard"""
+    if 'user_id' not in session or not session.get('is_admin'):
+        return redirect(url_for('main.login'))
+    
+    total_users = User.query.count()
+    total_products = Product.query.count()
+    total_orders = Order.query.count()
+    total_revenue = sum(order.final_amount for order in Order.query.all())
+    
+    return render_template(
+        'admin/dashboard.html',
+        total_users=total_users,
+        total_products=total_products,
+        total_orders=total_orders,
+        total_revenue=total_revenue,
+        page_title='Admin Dashboard - Aura by Honeyy'
+    )
+
+
+@bp.route('/admin/products')
+def admin_products():
+    """Manage products"""
+    if 'user_id' not in session or not session.get('is_admin'):
+        return redirect(url_for('main.login'))
+    
+    products = Product.query.all()
+    
+    return render_template(
+        'admin/products.html',
+        products=products,
+        page_title='Manage Products - Aura Admin'
+    )
+
+
+@bp.route('/admin/products/create', methods=['GET', 'POST'])
+def create_product():
+    """Create new product"""
+    if 'user_id' not in session or not session.get('is_admin'):
+        return redirect(url_for('main.login'))
+    
+    if request.method == 'POST':
+        name = request.form.get('name')
+        description = request.form.get('description')
+        price = request.form.get('price', type=float)
+        stock = request.form.get('stock', type=int)
+        category_id = request.form.get('category_id', type=int)
+        sku = request.form.get('sku')
+        
+        product = Product(
+            name=name,
+            description=description,
+            price=price,
+            stock=stock,
+            category_id=category_id,
+            sku=sku
+        )
+        
+        db.session.add(product)
+        db.session.commit()
+        
+        return redirect(url_for('main.admin_products'))
+    
+    categories = Category.query.all()
+    return render_template(
+        'admin/product_form.html',
+        categories=categories,
+        page_title='Create Product - Aura Admin'
+    )
+
+
+@bp.route('/admin/orders')
+def admin_orders():
+    """View all orders"""
+    if 'user_id' not in session or not session.get('is_admin'):
+        return redirect(url_for('main.login'))
+    
+    orders = Order.query.order_by(Order.created_at.desc()).all()
+    
+    return render_template(
+        'admin/orders.html',
+        orders=orders,
+        page_title='Manage Orders - Aura Admin'
+    )
+
+
+@bp.route('/admin/orders/<int:order_id>/status', methods=['POST'])
+def update_order_status(order_id):
+    """Update order status"""
+    if 'user_id' not in session or not session.get('is_admin'):
+        return redirect(url_for('main.login'))
+    
+    order = Order.query.get_or_404(order_id)
+    status = request.form.get('status')
+    
+    order.status = status
+    db.session.commit()
+    
+    return redirect(url_for('main.admin_orders'))

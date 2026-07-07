@@ -206,3 +206,92 @@ class ContactMessage(db.Model):
     
     def __repr__(self):
         return f"<ContactMessage from {self.email}>"
+    
+#--------------------------------------- Amin Models ----------------------------------------------
+class AdminLog(db.Model):
+    """Track every admin action for audit trail"""
+    __tablename__ = "admin_logs"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    admin_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    action = db.Column(db.String(100), nullable=False)  # 'create', 'update', 'delete'
+    entity_type = db.Column(db.String(50), nullable=False)  # 'Product', 'Category', 'Order'
+    entity_id = db.Column(db.Integer)  # ID of what was changed
+    description = db.Column(db.Text)  # What changed
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    
+    def __repr__(self):
+        return f"<AdminLog {self.admin_id} - {self.action}>"
+ 
+ 
+# ---------------------------------- DAILY SALES METRICS --------------------------------------
+class SalesReport(db.Model):
+    """Daily sales analytics for admin dashboard"""
+    __tablename__ = "sales_reports"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    report_date = db.Column(db.Date, nullable=False, unique=True)
+    total_orders = db.Column(db.Integer, default=0)
+    total_revenue = db.Column(db.Float, default=0)
+    total_items_sold = db.Column(db.Integer, default=0)
+    new_customers = db.Column(db.Integer, default=0)
+    total_refunds = db.Column(db.Float, default=0)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    
+    def __repr__(self):
+        return f"<SalesReport {self.report_date}>"
+ 
+ 
+# ----------------------------------------- STOCK TRACKING ---------------------------------------
+class StockHistory(db.Model):
+    """Track all stock changes for inventory management"""
+    __tablename__ = "stock_history"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False)
+    previous_quantity = db.Column(db.Integer)
+    new_quantity = db.Column(db.Integer)
+    change_type = db.Column(db.String(50), nullable=False)  # 'purchase', 'sale', 'adjustment'
+    reason = db.Column(db.String(255))
+    admin_id = db.Column(db.Integer, db.ForeignKey('users.id'))  # Who made change
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    
+    def __repr__(self):
+        return f"<StockHistory Product {self.product_id}>"
+ 
+ 
+# -------------------------------- PRODUCT ANALYTICS --------------------------
+class ProductAnalytics(db.Model):
+    """Track product sales performance"""
+    __tablename__ = "product_analytics"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    product_id = db.Column(db.Integer, db.ForeignKey('products.id'), nullable=False, unique=True)
+    views_count = db.Column(db.Integer, default=0)  # How many viewed
+    units_sold = db.Column(db.Integer, default=0)  # How many sold
+    revenue = db.Column(db.Float, default=0)  # Total revenue from this product
+    average_rating = db.Column(db.Float, default=0)
+    total_reviews = db.Column(db.Integer, default=0)
+    last_updated = db.Column(db.DateTime, default=db.func.now(), onupdate=db.func.now())
+    
+    def __repr__(self):
+        return f"<ProductAnalytics Product {self.product_id}>"
+ 
+ 
+# ----------------------------- REFUND MANAGEMENT ------------------------
+class Refund(db.Model):
+    """Track refund requests and processing"""
+    __tablename__ = "refunds"
+    
+    id = db.Column(db.Integer, primary_key=True)
+    order_id = db.Column(db.Integer, db.ForeignKey('orders.id'), nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False)
+    refund_amount = db.Column(db.Float, nullable=False)
+    reason = db.Column(db.Text, nullable=False)
+    status = db.Column(db.String(20), default='pending')  # 'pending', 'approved', 'rejected', 'processed'
+    notes = db.Column(db.Text)
+    created_at = db.Column(db.DateTime, default=db.func.now())
+    processed_at = db.Column(db.DateTime)
+    
+    def __repr__(self):
+        return f"<Refund Order {self.order_id}>"
