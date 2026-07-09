@@ -8,8 +8,34 @@ from werkzeug.security import generate_password_hash, check_password_hash
 from datetime import datetime
 import os
 from sqlalchemy import select
+from functools import wraps
 
 bp = Blueprint('main',__name__)
+
+# --------------- DECORATORS -----------------------------------------
+def login_required(f):
+    """Check if user is logged in"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in to access this page.', 'warning')
+            return redirect(url_for('main.login'))
+        return f(*args, **kwargs)
+    return decorated_function
+
+def admin_required(f):
+    """Check if user is admin"""
+    @wraps(f)
+    def decorated_function(*args, **kwargs):
+        if 'user_id' not in session:
+            flash('Please log in first.', 'warning')
+            return redirect(url_for('main.login'))
+        if not session.get('is_admin'):
+            flash('Access denied! Admin only.', 'danger')
+            return redirect(url_for('main.index'))
+        return f(*args, **kwargs)
+    return decorated_function
+
 
 # --------------- Public And Home routes -----------------------------------------
 @bp.route('/')
@@ -123,10 +149,8 @@ def logout():
 
 # --------------------------------Shopping cart routes ------------------------------------
 @bp.route('/cart')
+@login_required
 def view_cart():
-    if 'user_id' not in session:
-        return redirect(url_for('main.login'))
-    
     user_id = session['user_id']
     cart = Cart.query.filter_by(user_id=user_id).first()
     
@@ -140,10 +164,8 @@ def view_cart():
     return render_template('cart.html', cart_items=cart_items, total=total, page_title='Shopping Cart - Aura By Honeyy')
 
 @bp.route('/cart/add/<int:product_id>', methods=['POST'])
+@login_required
 def add_to_cart(product_id):
-    if 'user_id' not in session:
-        return redirect(url_for('main.login'))
-
     quantity = request.form.get('quantity', 1, type=int)
 
     user_id = session['user_id']
@@ -177,10 +199,10 @@ def add_to_cart(product_id):
         db.session.add(cart_item)
     db.session.commit()
 
-    # update the 
     return redirect(url_for('main.view_cart'))
     
 @bp.route('/cart/remove/<int:cart_item_id>', methods=['POST'])
+@login_required
 def remove_from_cart(cart_item_id):
     cart_item = CartItem.query.get_or_404(cart_item_id)
     db.session.delete(cart_item)
@@ -189,6 +211,7 @@ def remove_from_cart(cart_item_id):
     return redirect(url_for('main.view_cart'))
 
 @bp.route('/cart/update/<int:cart_item_id>', methods=['POST'])
+@login_required
 def update_cart_item(cart_item_id):
     cart_item = CartItem.query.get_or_404(cart_item_id)
     quantity = request.form.get('quantity', 1, type=int)
@@ -203,11 +226,9 @@ def update_cart_item(cart_item_id):
 
 # ---------------------- product interaction cart -------------------------------
 @bp.route('/product/<int:product_id>/review', methods=['POST'])
+@login_required
 def add_review(product_id):
     """Add product review"""
-    if 'user_id' not in session:
-        return redirect(url_for('main.login'))
-    
     user_id = session['user_id']
     rating = request.form.get('rating', type=int)
     comment = request.form.get('comment')
@@ -233,10 +254,8 @@ def add_review(product_id):
     return redirect(url_for('main.product_detail', product_id=product_id))
 
 @bp.route('/product/<int:product_id>/wishlist', methods=['POST'])
+@login_required
 def toggle_wishlist(product_id):
-    if 'user_id' not in session:
-        return redirect(url_for('main.login'))
-    
     user_id = session['user_id']
     
     # Check if already in wishlist
@@ -304,10 +323,8 @@ def server_error(error):
 
 # -------------------------------------Checkout and orders ----------------------------------
 @bp.route('/checkout', methods=['GET','POST'])
+@login_required
 def checkout():
-    if 'user_id' not in session:
-        return redirect(url_for('main.login'))
-
     if request.method == 'POST':
         user_id = session['user_id']
         user = User.query.get(user_id)
@@ -364,6 +381,7 @@ def checkout():
     )
 
 @bp.route('/order_success/<int:order_id>')
+@login_required
 def order_success(order_id):
     order = Order.query.get_or_404(order_id)
     order_item = OrderItem.query.filter_by(order_id=order_id).all()
@@ -371,10 +389,8 @@ def order_success(order_id):
     return render_template('order_success.html', order=order, order_item=order_item, page_title='Order Confirmed - Aura By Honeyy')
 
 @bp.route('/orders')
+@login_required
 def orders():
-    if 'user_id' not in session:
-        return redirect(url_for('main.login'))
-
     user_id = session['user_id']
     orders = Order.query.filter_by(user_id=user_id).order_by(Order.created_at.desc()).all()
 
@@ -383,11 +399,9 @@ def orders():
 # ----------------------------- ADMIN ROUTES ---------------------------------------
 
 @bp.route('/admin')
+@admin_required
 def admin_dashboard():
     """Admin dashboard"""
-    if 'user_id' not in session or not session.get('is_admin'):
-        return redirect(url_for('main.login'))
-    
     total_users = User.query.count()
     total_products = Product.query.count()
     total_orders = Order.query.count()
@@ -404,11 +418,9 @@ def admin_dashboard():
 
 
 @bp.route('/admin/products')
+@admin_required
 def admin_products():
     """Manage products"""
-    if 'user_id' not in session or not session.get('is_admin'):
-        return redirect(url_for('main.login'))
-    
     products = Product.query.all()
     
     return render_template(
@@ -419,11 +431,9 @@ def admin_products():
 
 
 @bp.route('/admin/products/create', methods=['GET', 'POST'])
+@admin_required
 def create_product():
     """Create new product"""
-    if 'user_id' not in session or not session.get('is_admin'):
-        return redirect(url_for('main.login'))
-    
     if request.method == 'POST':
         name = request.form.get('name')
         description = request.form.get('description')
@@ -455,11 +465,9 @@ def create_product():
 
 
 @bp.route('/admin/orders')
+@admin_required
 def admin_orders():
     """View all orders"""
-    if 'user_id' not in session or not session.get('is_admin'):
-        return redirect(url_for('main.login'))
-    
     orders = Order.query.order_by(Order.created_at.desc()).all()
     
     return render_template(
@@ -470,11 +478,9 @@ def admin_orders():
 
 
 @bp.route('/admin/orders/<int:order_id>/status', methods=['POST'])
+@admin_required
 def update_order_status(order_id):
     """Update order status"""
-    if 'user_id' not in session or not session.get('is_admin'):
-        return redirect(url_for('main.login'))
-    
     order = Order.query.get_or_404(order_id)
     status = request.form.get('status')
     

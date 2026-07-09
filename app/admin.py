@@ -1,5 +1,4 @@
-from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash
-from flask_login import login_required, current_user
+from flask import Blueprint, render_template, request, jsonify, redirect, url_for, flash, session
 from functools import wraps
 from datetime import datetime, timedelta
 from app import db
@@ -7,28 +6,33 @@ from app.models import (
     User, Product, Category, Order, OrderItem, Review, 
     AdminLog, SalesReport, StockHistory, ProductAnalytics, Refund
 )
- 
+
 # Create admin blueprint
 admin_bp = Blueprint('admin', __name__, url_prefix='/admin')
- 
+
 # --------------- ADMIN ONLY DECORATOR ---------------
 def admin_required(f):
     """Check if user is admin"""
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not current_user.is_authenticated or not current_user.is_admin:
+        if 'user_id' not in session:
+            flash('Please log in first.', 'warning')
+            return redirect(url_for('main.login'))
+            
+        if not session.get('is_admin'):
             flash('Access denied! Admin only.', 'danger')
-            return redirect(url_for('index'))
+            return redirect(url_for('main.index')) 
+            
         return f(*args, **kwargs)
     return decorated_function
- 
- 
+
+
 # ------------ HELPER FUNCTION --------------
 def log_admin_action(action, entity_type, entity_id, description):
     """Log admin action to AdminLog"""
     try:
         log = AdminLog(
-            admin_id=current_user.id,
+            admin_id=session.get('user_id'),
             action=action,
             entity_type=entity_type,
             entity_id=entity_id,
@@ -38,12 +42,11 @@ def log_admin_action(action, entity_type, entity_id, description):
         db.session.commit()
     except Exception as e:
         print(f"Error logging admin action: {e}")
- 
- 
+
+
 # ----------------- DASHBOARD -----------------
- 
+
 @admin_bp.route('/dashboard')
-@login_required
 @admin_required
 def dashboard():
     """Admin dashboard with key metrics"""
@@ -70,7 +73,8 @@ def dashboard():
         
         total_orders = len(orders)
         total_revenue = sum(o.final_amount for o in orders)
-        items_sold = sum(len(o.order_items) for o in orders)
+        # FIX: Changed o.order_items to o.items to match your models.py
+        items_sold = sum(len(o.items) for o in orders)
     
     # Get total products
     total_products = Product.query.count()
@@ -98,22 +102,20 @@ def dashboard():
                          recent_orders=recent_orders,
                          top_products=top_products,
                          low_stock=low_stock)
- 
- 
+
+
 # ---------------- PRODUCTS MANAGEMENT ------------------
- 
+
 @admin_bp.route('/products')
-@login_required
 @admin_required
 def products():
     """List all products"""
     page = request.args.get('page', 1, type=int)
     products_list = Product.query.paginate(page=page, per_page=10)
     return render_template('admin/products.html', products=products_list)
- 
- 
+
+
 @admin_bp.route('/product/edit/<int:product_id>', methods=['GET', 'POST'])
-@login_required
 @admin_required
 def edit_product(product_id):
     """Edit product"""
@@ -139,10 +141,9 @@ def edit_product(product_id):
         return redirect(url_for('admin.products'))
     
     return render_template('admin/edit_product.html', product=product, categories=categories)
- 
- 
+
+
 @admin_bp.route('/product/delete/<int:product_id>')
-@login_required
 @admin_required
 def delete_product(product_id):
     """Delete product"""
@@ -157,22 +158,20 @@ def delete_product(product_id):
     
     flash(f'Product {product_name} deleted successfully!', 'success')
     return redirect(url_for('admin.products'))
- 
- 
+
+
 # ----------------- ORDERS MANAGEMENT -----------------
- 
+
 @admin_bp.route('/orders')
-@login_required
 @admin_required
 def orders():
     """List all orders"""
     page = request.args.get('page', 1, type=int)
     orders_list = Order.query.order_by(Order.created_at.desc()).paginate(page=page, per_page=10)
     return render_template('admin/orders.html', orders=orders_list)
- 
- 
+
+
 @admin_bp.route('/order/<int:order_id>')
-@login_required
 @admin_required
 def order_detail(order_id):
     """View order details"""
@@ -180,10 +179,9 @@ def order_detail(order_id):
     refund = Refund.query.filter_by(order_id=order_id).first()
     
     return render_template('admin/order_detail.html', order=order, refund=refund)
- 
- 
+
+
 @admin_bp.route('/order/update-status/<int:order_id>', methods=['POST'])
-@login_required
 @admin_required
 def update_order_status(order_id):
     """Update order status"""
@@ -202,32 +200,29 @@ def update_order_status(order_id):
         return jsonify({'success': True, 'message': f'Order status updated to {status}'})
     
     return jsonify({'success': False, 'message': 'Invalid status'})
- 
- 
+
+
 # ------------------ REFUND MANAGEMENT ------------------
- 
+
 @admin_bp.route('/refunds')
-@login_required
 @admin_required
 def refunds():
     """List all refund requests"""
     page = request.args.get('page', 1, type=int)
     refunds_list = Refund.query.order_by(Refund.created_at.desc()).paginate(page=page, per_page=10)
     return render_template('admin/refunds.html', refunds=refunds_list)
- 
- 
+
+
 @admin_bp.route('/refund/<int:refund_id>')
-@login_required
 @admin_required
 def refund_detail(refund_id):
     """View refund details"""
     refund = Refund.query.get_or_404(refund_id)
     order = Order.query.get(refund.order_id)
     return render_template('admin/refund_detail.html', refund=refund, order=order)
- 
- 
+
+
 @admin_bp.route('/refund/approve/<int:refund_id>', methods=['POST'])
-@login_required
 @admin_required
 def approve_refund(refund_id):
     """Approve refund request"""
@@ -241,10 +236,9 @@ def approve_refund(refund_id):
     log_admin_action('update', 'Refund', refund_id, f'Approved refund for order {refund.order_id}')
     
     return jsonify({'success': True, 'message': 'Refund approved!'})
- 
- 
+
+
 @admin_bp.route('/refund/reject/<int:refund_id>', methods=['POST'])
-@login_required
 @admin_required
 def reject_refund(refund_id):
     """Reject refund request"""
@@ -258,10 +252,9 @@ def reject_refund(refund_id):
     log_admin_action('update', 'Refund', refund_id, f'Rejected refund for order {refund.order_id}')
     
     return jsonify({'success': True, 'message': 'Refund rejected!'})
- 
- 
+
+
 @admin_bp.route('/refund/process/<int:refund_id>', methods=['POST'])
-@login_required
 @admin_required
 def process_refund(refund_id):
     """Process (complete) refund"""
@@ -275,12 +268,11 @@ def process_refund(refund_id):
     log_admin_action('update', 'Refund', refund_id, f'Processed refund of ₹{refund.refund_amount} for order {refund.order_id}')
     
     return jsonify({'success': True, 'message': f'Refund of ₹{refund.refund_amount} processed!'})
- 
- 
+
+
 # ---------------- INVENTORY MANAGEMENT ------------------
- 
+
 @admin_bp.route('/inventory')
-@login_required
 @admin_required
 def inventory():
     """Inventory management"""
@@ -293,10 +285,9 @@ def inventory():
     stock_history = StockHistory.query.order_by(StockHistory.created_at.desc()).limit(20).all()
     
     return render_template('admin/inventory.html', products=products_list, stock_history=stock_history)
- 
- 
+
+
 @admin_bp.route('/inventory/adjust-stock/<int:product_id>', methods=['POST'])
-@login_required
 @admin_required
 def adjust_stock(product_id):
     """Adjust product stock"""
@@ -313,7 +304,7 @@ def adjust_stock(product_id):
         new_quantity=new_quantity,
         change_type='adjustment',
         reason=reason,
-        admin_id=current_user.id
+        admin_id=session.get('user_id')
     )
     
     # Update product stock
@@ -326,12 +317,11 @@ def adjust_stock(product_id):
     log_admin_action('update', 'Product', product_id, f'Adjusted stock from {old_quantity} to {new_quantity}')
     
     return jsonify({'success': True, 'message': f'Stock updated from {old_quantity} to {new_quantity}'})
- 
- 
+
+
 # -------------------- ANALYTICS -------------------
- 
+
 @admin_bp.route('/analytics')
-@login_required
 @admin_required
 def analytics():
     """Analytics and reports"""
@@ -371,24 +361,22 @@ def analytics():
                          sales_data=sales_data,
                          top_products=top_products,
                          top_revenue=top_revenue)
- 
- 
+
+
 # ---------------- ADMIN LOGS -------------------
- 
+
 @admin_bp.route('/logs')
-@login_required
 @admin_required
 def logs():
     """View admin action logs"""
     page = request.args.get('page', 1, type=int)
     logs_list = AdminLog.query.order_by(AdminLog.created_at.desc()).paginate(page=page, per_page=20)
     return render_template('admin/logs.html', logs=logs_list)
- 
- 
+
+
 # -------------- STATISTICS API ---------------
- 
+
 @admin_bp.route('/api/stats')
-@login_required
 @admin_required
 def get_stats():
     """Get dashboard statistics (JSON API)"""

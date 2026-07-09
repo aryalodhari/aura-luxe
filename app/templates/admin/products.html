@@ -1,0 +1,108 @@
+<!-- app/templates/admin/products.html -->
+{% extends "admin/base.html" %}
+
+{% block page_title %}Products Management{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>📦 Products</h3>
+    <a href="#" class="btn btn-success">+ Add New Product</a>
+</div>
+
+<div class="card">
+    <div class="card-body">
+        {% if products.items %}
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Price</th>
+                        <th>Stock</th>
+                        <th>Category</th>
+                        <th>Status</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product in products.items %}
+                        <tr>
+                            <td>
+                                <strong>{{ product.name }}</strong>
+                            </td>
+                            <td>₹{{ product.price }}</td>
+                            <td>
+                                {% if product.stock < 10 %}
+                                    <span class="badge bg-danger">{{ product.stock }}</span>
+                                {% elif product.stock < 20 %}
+                                    <span class="badge bg-warning">{{ product.stock }}</span>
+                                {% else %}
+                                    <span class="badge bg-success">{{ product.stock }}</span>
+                                {% endif %}
+                            </td>
+                            <td>{{ product.category.name if product.category else 'N/A' }}</td>
+                            <td>
+                                {% if product.is_active %}
+                                    <span class="badge bg-success">Active</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">Inactive</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin.edit_product', product_id=product.id) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    ✏️ Edit
+                                </a>
+                                <a href="{{ url_for('admin.delete_product', product_id=product.id) }}" 
+                                   class="btn btn-sm btn-danger"
+                                   onclick="return confirm('Are you sure?')">
+                                    🗑️ Delete
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- PAGINATION -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if products.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.products', page=products.prev_num) }}">
+                                Previous
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in products.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num == products.page %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.products', page=page_num) }}">
+                                        {{ page_num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if products.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.products', page=products.next_num) }}">
+                                Next
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% else %}
+            <p class="text-muted text-center py-4">No products found</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

@@ -1,6 +1,6 @@
 from app import create_app, db
 from app.models import (
-    Category, Product, 
+    Category, Product, User,
     DiscountCode
 )
 from werkzeug.security import generate_password_hash
@@ -16,6 +16,17 @@ with app.app_context():
     # Create all tables
     print("🏗️  Creating all tables...")
     db.create_all()
+
+    if not User.query.filter_by(username='admin').first():
+        admin_user = User(
+            username='admin',
+            email='admin@aurabyhoneyy.com',
+            password=generate_password_hash('admin123'),
+            is_admin=True
+        )
+        db.session.add(admin_user)
+        db.session.commit()
+        print("✅ Admin user created successfully!")
 
         # Categories
     print("\n📂 Creating categories...")
