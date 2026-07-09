@@ -1,0 +1,232 @@
+<!-- app/templates/admin/order_detail.html -->
+{% extends "admin/base.html" %}
+
+{% block page_title %}Order Details{% endblock %}
+
+{% block extra_js %}
+<script>
+function updateOrderStatus() {
+    const newStatus = document.getElementById('statusSelect').value;
+    
+    fetch('{{ url_for("admin.update_order_status", order_id=order.id) }}', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({status: newStatus})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            alert('Status updated successfully!');
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    });
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4">
+    <h3>📦 Order #{{ order.order_number }}</h3>
+    <a href="{{ url_for('admin.orders') }}" class="btn btn-secondary">← Back to Orders</a>
+</div>
+
+<div class="row">
+    <!-- ORDER DETAILS -->
+    <div class="col-md-8">
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <strong>Order Information</strong>
+            </div>
+            <div class="card-body">
+                <div class="row mb-3">
+                    <div class="col-md-6">
+                        <p><strong>Order ID:</strong> {{ order.id }}</p>
+                        <p><strong>Order Number:</strong> #{{ order.order_number }}</p>
+                        <p><strong>Date:</strong> {{ order.created_at.strftime('%d-%m-%Y %H:%M') }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Customer:</strong> {{ order.customer_name or order.user.username }}</p>
+                        <p><strong>Email:</strong> {{ order.user.email }}</p>
+                        <p><strong>Phone:</strong> {{ order.user.phone or 'N/A' }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- ORDER ITEMS -->
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <strong>Items Ordered</strong>
+            </div>
+            <div class="card-body">
+                <table class="table table-sm">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product</th>
+                            <th>Quantity</th>
+                            <th>Price</th>
+                            <th>Subtotal</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for item in order.order_items %}
+                            <tr>
+                                <td>
+                                    {{ item.product.name if item.product else item.product_name }}
+                                </td>
+                                <td>{{ item.quantity }}</td>
+                                <td>₹{{ item.price }}</td>
+                                <td>₹{{ item.quantity * item.price }}</td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- ORDER SUMMARY -->
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <strong>Order Summary</strong>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6 offset-md-6">
+                        <p>
+                            <strong>Subtotal:</strong>
+                            <span class="float-end">₹{{ order.total_amount }}</span>
+                        </p>
+                        <p>
+                            <strong>Discount:</strong>
+                            <span class="float-end">-₹{{ order.discount_amount }}</span>
+                        </p>
+                        <hr>
+                        <p>
+                            <strong>Final Amount:</strong>
+                            <span class="float-end"><strong>₹{{ order.final_amount }}</strong></span>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- SHIPPING ADDRESS -->
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <strong>🏠 Shipping Address</strong>
+            </div>
+            <div class="card-body">
+                <p>{{ order.shipping_address or 'Address not provided' }}</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- SIDEBAR -->
+    <div class="col-md-4">
+        <!-- ORDER STATUS -->
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <strong>Order Status</strong>
+            </div>
+            <div class="card-body">
+                <div class="mb-3">
+                    <p>
+                        Current Status: 
+                        <strong>
+                            {% if order.status == 'pending' %}
+                                <span class="badge bg-warning text-dark">{{ order.status }}</span>
+                            {% elif order.status == 'confirmed' %}
+                                <span class="badge bg-info">{{ order.status }}</span>
+                            {% elif order.status == 'shipped' %}
+                                <span class="badge bg-primary">{{ order.status }}</span>
+                            {% elif order.status == 'delivered' %}
+                                <span class="badge bg-success">{{ order.status }}</span>
+                            {% elif order.status == 'cancelled' %}
+                                <span class="badge bg-danger">{{ order.status }}</span>
+                            {% else %}
+                                <span class="badge bg-secondary">{{ order.status }}</span>
+                            {% endif %}
+                        </strong>
+                    </p>
+                </div>
+                
+                <div class="mb-3">
+                    <label for="statusSelect" class="form-label">Change Status:</label>
+                    <select class="form-select" id="statusSelect">
+                        <option value="">-- Select new status --</option>
+                        <option value="pending">pending</option>
+                        <option value="confirmed">confirmed</option>
+                        <option value="processing">processing</option>
+                        <option value="shipped">shipped</option>
+                        <option value="delivered">delivered</option>
+                        <option value="cancelled">cancelled</option>
+                    </select>
+                </div>
+                
+                <button class="btn btn-primary w-100" onclick="updateOrderStatus()">
+                    ✅ Update Status
+                </button>
+            </div>
+        </div>
+        
+        <!-- PAYMENT INFO -->
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <strong>💳 Payment</strong>
+            </div>
+            <div class="card-body">
+                <p>
+                    <strong>Method:</strong> {{ order.payment_method or 'Not specified' }}
+                </p>
+                <p>
+                    <strong>Status:</strong>
+                    {% if order.payment_status == 'completed' %}
+                        <span class="badge bg-success">{{ order.payment_status }}</span>
+                    {% elif order.payment_status == 'pending' %}
+                        <span class="badge bg-warning text-dark">{{ order.payment_status }}</span>
+                    {% elif order.payment_status == 'failed' %}
+                        <span class="badge bg-danger">{{ order.payment_status }}</span>
+                    {% else %}
+                        <span class="badge bg-secondary">{{ order.payment_status }}</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <!-- REFUND INFO -->
+        {% if refund %}
+            <div class="card">
+                <div class="card-header bg-light">
+                    <strong>💰 Refund Request</strong>
+                </div>
+                <div class="card-body">
+                    <p><strong>Amount:</strong> ₹{{ refund.refund_amount }}</p>
+                    <p><strong>Reason:</strong> {{ refund.reason }}</p>
+                    <p>
+                        <strong>Status:</strong>
+                        {% if refund.status == 'pending' %}
+                            <span class="badge bg-warning text-dark">{{ refund.status }}</span>
+                        {% elif refund.status == 'approved' %}
+                            <span class="badge bg-info">{{ refund.status }}</span>
+                        {% elif refund.status == 'processed' %}
+                            <span class="badge bg-success">{{ refund.status }}</span>
+                        {% elif refund.status == 'rejected' %}
+                            <span class="badge bg-danger">{{ refund.status }}</span>
+                        {% endif %}
+                    </p>
+                    
+                    <a href="{{ url_for('admin.refund_detail', refund_id=refund.id) }}" 
+                       class="btn btn-sm btn-info w-100">
+                        View Refund Details
+                    </a>
+                </div>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

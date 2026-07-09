@@ -1,0 +1,106 @@
+<!-- app/templates/admin/refunds.html -->
+{% extends "admin/base.html" %}
+
+{% block page_title %}Refund Management{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">💰 Refund Requests</h3>
+
+<div class="card">
+    <div class="card-body">
+        {% if refunds.items %}
+            <table class="table table-hover">
+                <thead class="table-light">
+                    <tr>
+                        <th>Order #</th>
+                        <th>Customer</th>
+                        <th>Amount</th>
+                        <th>Reason</th>
+                        <th>Status</th>
+                        <th>Date</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for refund in refunds.items %}
+                        <tr>
+                            <td>
+                                <strong>#{{ refund.order_id }}</strong>
+                            </td>
+                            <td>
+                                {{ refund.user.username }}
+                            </td>
+                            <td>
+                                <strong>₹{{ refund.refund_amount }}</strong>
+                            </td>
+                            <td>
+                                <small>{{ refund.reason[:50] }}...</small>
+                            </td>
+                            <td>
+                                {% if refund.status == 'pending' %}
+                                    <span class="badge bg-warning text-dark">{{ refund.status }}</span>
+                                {% elif refund.status == 'approved' %}
+                                    <span class="badge bg-info">{{ refund.status }}</span>
+                                {% elif refund.status == 'processed' %}
+                                    <span class="badge bg-success">{{ refund.status }}</span>
+                                {% elif refund.status == 'rejected' %}
+                                    <span class="badge bg-danger">{{ refund.status }}</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                {{ refund.created_at.strftime('%d-%m-%Y') }}
+                            </td>
+                            <td>
+                                <a href="{{ url_for('admin.refund_detail', refund_id=refund.id) }}" 
+                                   class="btn btn-sm btn-primary">
+                                    👁️ View
+                                </a>
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            
+            <!-- PAGINATION -->
+            <nav aria-label="Page navigation">
+                <ul class="pagination justify-content-center">
+                    {% if refunds.has_prev %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.refunds', page=refunds.prev_num) }}">
+                                Previous
+                            </a>
+                        </li>
+                    {% endif %}
+                    
+                    {% for page_num in refunds.iter_pages() %}
+                        {% if page_num %}
+                            {% if page_num == refunds.page %}
+                                <li class="page-item active">
+                                    <span class="page-link">{{ page_num }}</span>
+                                </li>
+                            {% else %}
+                                <li class="page-item">
+                                    <a class="page-link" href="{{ url_for('admin.refunds', page=page_num) }}">
+                                        {{ page_num }}
+                                    </a>
+                                </li>
+                            {% endif %}
+                        {% endif %}
+                    {% endfor %}
+                    
+                    {% if refunds.has_next %}
+                        <li class="page-item">
+                            <a class="page-link" href="{{ url_for('admin.refunds', page=refunds.next_num) }}">
+                                Next
+                            </a>
+                        </li>
+                    {% endif %}
+                </ul>
+            </nav>
+        {% else %}
+            <p class="text-muted text-center py-4">No refund requests found</p>
+        {% endif %}
+    </div>
+</div>
+
+{% endblock %}

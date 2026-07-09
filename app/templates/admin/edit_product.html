@@ -1,0 +1,148 @@
+<!-- app/templates/admin/edit_product.html -->
+{% extends "admin/base.html" %}
+
+{% block page_title %}Edit Product{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">✏️ Edit Product</h3>
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header bg-light">
+                <strong>{{ product.name }}</strong>
+            </div>
+            <div class="card-body">
+                <form method="POST" action="{{ url_for('admin.edit_product', product_id=product.id) }}">
+                    
+                    <!-- Product Name -->
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Product Name</label>
+                        <input type="text" class="form-control" id="name" name="name" 
+                               value="{{ product.name }}" required>
+                    </div>
+                    
+                    <!-- Slug -->
+                    <div class="mb-3">
+                        <label for="slug" class="form-label">Slug (URL friendly)</label>
+                        <input type="text" class="form-control" id="slug" name="slug" 
+                               value="{{ product.slug }}" required>
+                        <small class="text-muted">Example: rose-serum</small>
+                    </div>
+                    
+                    <!-- Description -->
+                    <div class="mb-3">
+                        <label for="description" class="form-label">Description</label>
+                        <textarea class="form-control" id="description" name="description" 
+                                  rows="4" required>{{ product.description }}</textarea>
+                    </div>
+                    
+                    <!-- Price -->
+                    <div class="row mb-3">
+                        <div class="col-md-6">
+                            <label for="price" class="form-label">Price (₹)</label>
+                            <input type="number" class="form-control" id="price" name="price" 
+                                   value="{{ product.price }}" step="0.01" required>
+                        </div>
+                        
+                        <!-- Stock -->
+                        <div class="col-md-6">
+                            <label for="stock" class="form-label">Stock Quantity</label>
+                            <input type="number" class="form-control" id="stock" name="stock" 
+                                   value="{{ product.stock }}" required>
+                        </div>
+                    </div>
+                    
+                    <!-- Category -->
+                    <div class="mb-3">
+                        <label for="category_id" class="form-label">Category</label>
+                        <select class="form-control" id="category_id" name="category_id" required>
+                            <option value="">-- Select Category --</option>
+                            {% for category in categories %}
+                                <option value="{{ category.id }}" 
+                                        {% if product.category_id == category.id %}selected{% endif %}>
+                                    {{ category.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <!-- Image URL -->
+                    <div class="mb-3">
+                        <label for="image_url" class="form-label">Image URL</label>
+                        <input type="text" class="form-control" id="image_url" name="image_url" 
+                               value="{{ product.image_url or '' }}">
+                        <small class="text-muted">Example: rose_serum.jpg</small>
+                    </div>
+                    
+                    <!-- SKU -->
+                    <div class="mb-3">
+                        <label for="sku" class="form-label">SKU (Stock Keeping Unit)</label>
+                        <input type="text" class="form-control" id="sku" name="sku" 
+                               value="{{ product.sku or '' }}">
+                    </div>
+                    
+                    <!-- Active Status -->
+                    <div class="mb-3 form-check">
+                        <input type="checkbox" class="form-check-input" id="is_active" name="is_active"
+                               {% if product.is_active %}checked{% endif %}>
+                        <label class="form-check-label" for="is_active">
+                            Active (Visible in store)
+                        </label>
+                    </div>
+                    
+                    <!-- Submit Buttons -->
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                        <a href="{{ url_for('admin.products') }}" class="btn btn-secondary">
+                            Cancel
+                        </a>
+                        <button type="submit" class="btn btn-primary">
+                            💾 Save Changes
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <!-- PRODUCT INFO SIDEBAR -->
+    <div class="col-md-4">
+        <div class="card mb-3">
+            <div class="card-header bg-light">
+                <strong>Product Information</strong>
+            </div>
+            <div class="card-body">
+                <p><strong>ID:</strong> {{ product.id }}</p>
+                <p><strong>Created:</strong> {{ product.created_at.strftime('%Y-%m-%d %H:%M') }}</p>
+                <p><strong>Current Price:</strong> ₹{{ product.price }}</p>
+                <p><strong>Current Stock:</strong> {{ product.stock }}</p>
+                <p><strong>Category:</strong> {{ product.category.name if product.category else 'N/A' }}</p>
+                <p>
+                    <strong>Status:</strong>
+                    {% if product.is_active %}
+                        <span class="badge bg-success">Active</span>
+                    {% else %}
+                        <span class="badge bg-secondary">Inactive</span>
+                    {% endif %}
+                </p>
+            </div>
+        </div>
+        
+        <!-- QUICK ACTIONS -->
+        <div class="card">
+            <div class="card-header bg-light">
+                <strong>Quick Actions</strong>
+            </div>
+            <div class="card-body">
+                <a href="{{ url_for('admin.inventory') }}" class="btn btn-sm btn-info w-100 mb-2">
+                    📥 View Stock History
+                </a>
+                <a href="{{ url_for('admin.products') }}" class="btn btn-sm btn-secondary w-100">
+                    ← Back to Products
+                </a>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

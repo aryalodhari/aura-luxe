@@ -1,0 +1,204 @@
+<!-- app/templates/admin/inventory.html -->
+{% extends "admin/base.html" %}
+
+{% block page_title %}Inventory Management{% endblock %}
+
+{% block extra_js %}
+<script>
+function adjustStock(productId) {
+    const quantity = prompt('Enter new stock quantity:');
+    
+    if(quantity === null) return;
+    
+    const reason = prompt('Enter reason for adjustment:', 'Manual adjustment');
+    
+    if(reason === null) return;
+    
+    fetch('{{ url_for("admin.adjust_stock", product_id="PRODUCT_ID") }}'.replace('PRODUCT_ID', productId), {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({quantity: parseInt(quantity), reason: reason})
+    })
+    .then(response => response.json())
+    .then(data => {
+        if(data.success) {
+            alert(data.message);
+            location.reload();
+        } else {
+            alert('Error: ' + data.message);
+        }
+    });
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">📥 Inventory Management</h3>
+
+<!-- TABS -->
+<ul class="nav nav-tabs mb-4" role="tablist">
+    <li class="nav-item">
+        <a class="nav-link active" data-bs-toggle="tab" href="#productsTab">
+            📦 All Products
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#lowStockTab">
+            ⚠️ Low Stock
+        </a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link" data-bs-toggle="tab" href="#historyTab">
+            📋 Stock History
+        </a>
+    </li>
+</ul>
+
+<!-- TAB CONTENT -->
+<div class="tab-content">
+    
+    <!-- ALL PRODUCTS TAB -->
+    <div id="productsTab" class="tab-pane fade show active">
+        <div class="card">
+            <div class="card-body">
+                <table class="table table-hover">
+                    <thead class="table-light">
+                        <tr>
+                            <th>Product Name</th>
+                            <th>Stock</th>
+                            <th>Price</th>
+                            <th>Category</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for product in products %}
+                            <tr>
+                                <td>
+                                    <strong>{{ product.name }}</strong>
+                                </td>
+                                <td>
+                                    {% if product.stock < 10 %}
+                                        <span class="badge bg-danger">{{ product.stock }}</span>
+                                    {% elif product.stock < 20 %}
+                                        <span class="badge bg-warning">{{ product.stock }}</span>
+                                    {% else %}
+                                        <span class="badge bg-success">{{ product.stock }}</span>
+                                    {% endif %}
+                                </td>
+                                <td>₹{{ product.price }}</td>
+                                <td>{{ product.category.name if product.category else 'N/A' }}</td>
+                                <td>
+                                    {% if product.is_active %}
+                                        <span class="badge bg-success">Active</span>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Inactive</span>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <button class="btn btn-sm btn-primary" 
+                                            onclick="adjustStock({{ product.id }})">
+                                        ✏️ Adjust
+                                    </button>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    
+    <!-- LOW STOCK TAB -->
+    <div id="lowStockTab" class="tab-pane fade">
+        <div class="card">
+            <div class="card-body">
+                {% set low_stock_items = products|selectattr('stock', '<', 10)|list %}
+                
+                {% if low_stock_items %}
+                    <table class="table table-hover table-warning">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product Name</th>
+                                <th>Current Stock</th>
+                                <th>Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product in low_stock_items %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ product.name }}</strong>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-danger">{{ product.stock }} units</span>
+                                    </td>
+                                    <td>₹{{ product.price }}</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-success" 
+                                                onclick="adjustStock({{ product.id }})">
+                                            ➕ Restock
+                                        </button>
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted text-center py-4">✅ All products have sufficient stock!</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- STOCK HISTORY TAB -->
+    <div id="historyTab" class="tab-pane fade">
+        <div class="card">
+            <div class="card-body">
+                {% if stock_history %}
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Previous</th>
+                                <th>New</th>
+                                <th>Type</th>
+                                <th>Reason</th>
+                                <th>Date</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for history in stock_history %}
+                                <tr>
+                                    <td>
+                                        {% if history.product %}
+                                            {{ history.product.name }}
+                                        {% else %}
+                                            Product #{{ history.product_id }}
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ history.previous_quantity }}</td>
+                                    <td><strong>{{ history.new_quantity }}</strong></td>
+                                    <td>
+                                        <span class="badge bg-info">{{ history.change_type }}</span>
+                                    </td>
+                                    <td><small>{{ history.reason or 'N/A' }}</small></td>
+                                    <td>{{ history.created_at.strftime('%d-%m-%Y %H:%M') }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted text-center py-4">No stock history yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+</div>
+
+{% endblock %}

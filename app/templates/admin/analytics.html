@@ -1,0 +1,239 @@
+<!-- app/templates/admin/analytics.html -->
+{% extends "admin/base.html" %}
+
+{% block page_title %}Analytics & Reports{% endblock %}
+
+{% block content %}
+<h3 class="mb-4">📈 Analytics & Reports</h3>
+
+<!-- SALES TREND -->
+<div class="card mb-4">
+    <div class="card-header bg-light">
+        <strong>📊 Sales Trend (Last 7 Days)</strong>
+    </div>
+    <div class="card-body">
+        <table class="table table-sm">
+            <thead class="table-light">
+                <tr>
+                    <th>Date</th>
+                    <th>Orders</th>
+                    <th>Revenue</th>
+                    <th>Items Sold</th>
+                    <th>Customers</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for report in sales_data %}
+                    <tr>
+                        <td><strong>{{ report.report_date.strftime('%d-%m-%Y') }}</strong></td>
+                        <td>{{ report.total_orders }}</td>
+                        <td>₹{{ "%.0f"|format(report.total_revenue) }}</td>
+                        <td>{{ report.total_items_sold }}</td>
+                        <td>{{ report.new_customers }}</td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        
+        {% if not sales_data %}
+            <p class="text-muted text-center py-4">No sales data available yet</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- SECTIONS ROW -->
+<div class="row">
+    <!-- TOP PRODUCTS BY SALES -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <strong>⭐ Top 10 Products (By Sales)</strong>
+            </div>
+            <div class="card-body">
+                {% if top_products %}
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Sold</th>
+                                <th>Views</th>
+                                <th>Rating</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product, analytics in top_products %}
+                                <tr>
+                                    <td>
+                                        <small><strong>{{ product.name }}</strong></small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-success">{{ analytics.units_sold }}</span>
+                                    </td>
+                                    <td>{{ analytics.views_count }}</td>
+                                    <td>
+                                        {% if analytics.average_rating > 0 %}
+                                            ⭐ {{ "%.1f"|format(analytics.average_rating) }}
+                                        {% else %}
+                                            <span class="text-muted">No rating</span>
+                                        {% endif %}
+                                    </td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted text-center py-4">No sales data yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+    
+    <!-- TOP PRODUCTS BY REVENUE -->
+    <div class="col-md-6">
+        <div class="card mb-4">
+            <div class="card-header bg-light">
+                <strong>💰 Top 5 Products (By Revenue)</strong>
+            </div>
+            <div class="card-body">
+                {% if top_revenue %}
+                    <table class="table table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Product</th>
+                                <th>Revenue</th>
+                                <th>Units</th>
+                                <th>Reviews</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for product, analytics in top_revenue %}
+                                <tr>
+                                    <td>
+                                        <small><strong>{{ product.name }}</strong></small>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">₹{{ "%.0f"|format(analytics.revenue) }}</span>
+                                    </td>
+                                    <td>{{ analytics.units_sold }}</td>
+                                    <td>{{ analytics.total_reviews }}</td>
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                {% else %}
+                    <p class="text-muted text-center py-4">No revenue data yet</p>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- KEY METRICS -->
+<div class="row">
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="text-muted">Total Revenue</h5>
+                <h3 class="text-success">
+                    ₹{{ "%.0f"|format(sales_data|map(attribute='total_revenue')|sum) if sales_data else 0 }}
+                </h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="text-muted">Total Orders</h5>
+                <h3 class="text-primary">
+                    {{ sales_data|map(attribute='total_orders')|sum if sales_data else 0 }}
+                </h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="text-muted">Total Items Sold</h5>
+                <h3 class="text-info">
+                    {{ sales_data|map(attribute='total_items_sold')|sum if sales_data else 0 }}
+                </h3>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-3">
+        <div class="card text-center">
+            <div class="card-body">
+                <h5 class="text-muted">New Customers</h5>
+                <h3 class="text-warning">
+                    {{ sales_data|map(attribute='new_customers')|sum if sales_data else 0 }}
+                </h3>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- CONVERSION ANALYSIS -->
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <strong>🔄 Product Conversion Analysis</strong>
+    </div>
+    <div class="card-body">
+        {% if top_products %}
+            <p class="text-muted small">Products sorted by views (potential customers interested)</p>
+            <table class="table table-sm">
+                <thead class="table-light">
+                    <tr>
+                        <th>Product</th>
+                        <th>Views</th>
+                        <th>Sold</th>
+                        <th>Conversion</th>
+                        <th>Revenue</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for product, analytics in top_products[:5] %}
+                        {% set conversion = (analytics.units_sold / analytics.views_count * 100) if analytics.views_count > 0 else 0 %}
+                        <tr>
+                            <td><strong>{{ product.name }}</strong></td>
+                            <td>{{ analytics.views_count }}</td>
+                            <td>{{ analytics.units_sold }}</td>
+                            <td>
+                                {% if conversion > 0 %}
+                                    <span class="badge bg-success">{{ "%.1f"|format(conversion) }}%</span>
+                                {% else %}
+                                    <span class="badge bg-secondary">0%</span>
+                                {% endif %}
+                            </td>
+                            <td>₹{{ "%.0f"|format(analytics.revenue) }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        {% else %}
+            <p class="text-muted text-center py-4">No analytics data available yet</p>
+        {% endif %}
+    </div>
+</div>
+
+<!-- EXPORT SECTION -->
+<div class="card mt-4">
+    <div class="card-header bg-light">
+        <strong>📥 Export Reports</strong>
+    </div>
+    <div class="card-body">
+        <p class="text-muted">Download detailed reports for further analysis</p>
+        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+            <button class="btn btn-outline-primary" disabled>
+                📊 Export as CSV (Coming Soon)
+            </button>
+            <button class="btn btn-outline-success" disabled>
+                📄 Export as PDF (Coming Soon)
+            </button>
+        </div>
+    </div>
+</div>
+
+{% endblock %}
