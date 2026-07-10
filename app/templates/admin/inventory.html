@@ -14,7 +14,7 @@ function adjustStock(productId) {
     
     if(reason === null) return;
     
-    fetch('{{ url_for("admin.adjust_stock", product_id="PRODUCT_ID") }}'.replace('PRODUCT_ID', productId), {
+    fetch('{{ url_for("admin.adjust_stock", product_id=0) }}'.replace('0', productId), {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
