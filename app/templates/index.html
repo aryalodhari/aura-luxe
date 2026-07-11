@@ -1,9 +1,4 @@
-{% extends "base.html" %}
-
-{% block title %} Home - Aura By Honeyy {% endblock %}
-
-{% block content %}
-    <!--{# <div class="jumbotron bg-light py-1 px-1">
+<!--{# <div class="jumbotron bg-light py-1 px-1">
         {# <h1 class="display-4">Welcome to Aura ✨</h1>
         <p class="lead">Step into a world of uncompromising luxury and bold sophistication.<br> At AURA, we curate a premium selection of high-end items that blend <br> fierce elegance with modern chic comfort. Explore our collection and <br> find the perfect statement pieces to complement your exceptional lifestyle.</p>
         <a class="btn btn-gold btn-lg" href="/shop" role="button">Shop Now</a>
@@ -17,22 +12,43 @@
             <a class="btn btn-outline-light ms-3" href="/about">Our Story</a>
       </div>
     </div> #} -->
-    <!-- Hero Section -->
-     <div class="jumbotron p-0">
-        <div class="col-lg-12 position-relative h-100">
-        <img
-            class="hero-img h-100 w-100"
-            src="{{ url_for('static', filename='uploads/brand_logo/hero_img.JPEG') }}"
-            alt="Aura By Honeyy Hero"
-        />
     
-        <!-- Button Wrapper for Absolute Positioning -->
-        <div class="position-absolute" style="top: 90%; left: 3%; transform: translateY(-50%); z-index: 10;">
-            <a class="btn btn-gold btn-lg" href="/shop" role="button">Shop Now</a>
-            <a class="btn btn-outline-light ms-3" href="/about">Our Story</a>
+    <!-- Hero Section -->
+    {#<div class="jumbotron p-0">
+        <div class="col-lg-12 position-relative h-100">
+            <img
+                class="hero-img h-100 w-100"
+                src="{{ url_for('static', filename='uploads/brand_logo/hero_img.JPEG') }}"
+                alt="Aura By Honeyy Hero"
+            />
+    
+            <!-- Button Wrapper for Absolute Positioning -->
+            <div class="position-absolute" style="top: 90%; left: 3%; transform: translateY(-50%); z-index: 10;">
+                <a class="btn btn-gold btn-lg" href="/shop" role="button">Shop Now</a>
+                <a class="btn btn-outline-light ms-3" href="/about">Our Story</a>
+            </div>
+        </div>
+     </div>#}
+
+{% extends "base.html" %}
+
+{% block title %} Home - Aura By Honeyy {% endblock %}
+
+{% block content %}
+    
+    <!-- Hero Scroll Animation Section -->
+    <div class="hero-scroll-container">
+        <div class="sticky-hero">
+            <!-- Canvas where frames will be drawn -->
+            <canvas id="hero-canvas"></canvas>
+            
+            <!-- Button Wrapper for Absolute Positioning -->
+            <div class="hero-content">
+                <a class="btn btn-gold btn-lg" href="/shop" role="button">Shop Now</a>
+                <a class="btn btn-outline-light ms-3" href="/about">Our Story</a>
+            </div>
         </div>
     </div>
-     </div>
     
 
     <!-- Featured Products Section -->
@@ -43,15 +59,12 @@
             <div class="row">
                 {% for product in featured_products %}
                     <div class="col-md-4 mb-4">
-                        <!-- h-100 makes all cards the exact same height -->
                         <div class="card h-100">
-                            <!-- flex-column helps push the button to the bottom -->
                             <div class="card-body d-flex flex-column">
                                 <img src="/static/uploads/product/{{ product.image_url }}" alt="{{ product.name }}" style="width: 100%; height: 250px; object-fit: cover; margin-bottom: 15px;">
                                 <h5 class="card-title">{{ product.name }}</h5>
                                 <p class="card-text flex-grow-1">{{ product.description[:100] }}...</p>
                                 <p class="h5 text-primary">₹{{ product.price }}</p>
-                                <!-- mt-auto pushes the button strictly to the bottom of the card -->
                                 <a href="/product/{{ product.id }}" class="btn btn-primary btn-sm mt-auto">View Details</a>
                             </div>
                         </div>
@@ -85,4 +98,74 @@
             </div>
         </div>
     </div>
+
+    <!-- Scroll Animation Script -->
+    <script>
+        document.addEventListener("DOMContentLoaded", function() {
+            const canvas = document.getElementById("hero-canvas");
+            const context = canvas.getContext("2d");
+            const frameCount = 240; // Total number of frames you have
+            
+            // Set canvas internal resolution (Standard 1080p)
+            canvas.width = 1920;
+            canvas.height = 1080;
+
+            // Generate the image path based on frame number (pads with leading zeros like 001, 012, 240)
+            const currentFrame = index => (
+                `/static/uploads/frames/frame_${index.toString().padStart(6, '0')}.png`
+            );
+
+            // Preload all images so there is no flickering while scrolling
+            const images = [];
+            let imagesLoaded = 0;
+            const preloadImages = () => {
+                for (let i = 1; i <= frameCount; i++) {
+                    const img = new Image();
+                    img.src = currentFrame(i);
+                    images.push(img);
+                }
+            };
+
+            // Draw the very first frame immediately
+            const firstImg = new Image();
+            firstImg.src = currentFrame(1);
+            firstImg.onload = function() {
+                context.drawImage(firstImg, 0, 0, canvas.width, canvas.height);
+            };
+
+            // Start preloading the rest in the background
+            preloadImages();
+
+            // The scroll listener that ties scroll position to frame index
+            window.addEventListener('scroll', () => {
+                const container = document.querySelector('.hero-scroll-container');
+                
+                // Calculate how far down the user has scrolled *inside* our specific container
+                const scrollTop = window.scrollY - container.offsetTop;
+                
+                // Maximum distance they can scroll inside the container before hitting the end
+                const maxScroll = container.scrollHeight - window.innerHeight;
+
+                // Ensure we only animate when the container is actually in view
+                if (scrollTop >= 0 && scrollTop <= maxScroll) {
+                    // Get a percentage from 0.0 to 1.0
+                    const scrollFraction = scrollTop / maxScroll;
+                    
+                    // Map that percentage to a specific frame number (between 0 and 239 array index)
+                    const frameIndex = Math.min(
+                        frameCount - 1,
+                        Math.floor(scrollFraction * frameCount)
+                    );
+
+                    // Draw the requested frame to the canvas smoothly
+                    requestAnimationFrame(() => {
+                        if (images[frameIndex]) {
+                            context.drawImage(images[frameIndex], 0, 0, canvas.width, canvas.height);
+                        }
+                    });
+                }
+            });
+        });
+    </script>
 {% endblock %}
+

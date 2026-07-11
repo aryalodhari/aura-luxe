@@ -186,6 +186,41 @@ footer {
     font-size: 0.875rem;
 }
 
+/* -------------------------------------
+   Scroll Animation Hero Styles 
+------------------------------------- */
+
+.hero-scroll-container {
+    /* Height controls how long the scroll takes. 400vh = 4 full screen heights */
+    height: 500vh; 
+    position: relative;
+    background-color: var(--black); /* Fallback color */
+}
+
+.sticky-hero {
+    position: sticky;
+    top: 0;
+    height: 100vh;
+    width: 100%;
+    overflow: hidden;
+}
+
+#hero-canvas {
+    width: 100%;
+    height: 100%;
+    /* object-fit: cover ensures the canvas fills the screen exactly like an image would */
+    object-fit: cover; 
+    display: block;
+}
+
+.hero-content {
+    position: absolute;
+    top: 90%;
+    left: 3%;
+    transform: translateY(-50%);
+    z-index: 10;
+}
+
 /* Responsive Design */
 @media (max-width: 768px) {
     .navbar-brand {
