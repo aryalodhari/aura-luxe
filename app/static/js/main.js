@@ -27,7 +27,15 @@ function formatCurrency(amount) {
 }
 
 // for close the messagePanel from the jinja
-const btn = document.getElementById("btn")
-btn.addEventListener("click", function(e){
-    document.getElementById("messagepanel").style.display = "none";
-})
+const btn = document.getElementById("btn");
+
+// Fix: Check if the button actually exists on the page before adding the listener
+if (btn) {
+    btn.addEventListener("click", function(e){
+        const messagePanel = document.getElementById("messagepanel");
+        // Extra safety check for the panel itself
+        if (messagePanel) {
+            messagePanel.style.display = "none";
+        }
+    });
+}
